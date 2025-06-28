@@ -12,19 +12,41 @@ import { initialPermits } from '@/lib/data';
 
 export default function Home() {
   const [isFormOpen, setIsFormOpen] = React.useState(false);
-  const [permits, setPermits] = React.useState<Permit[]>(initialPermits.slice(0, 4));
+  const [permits, setPermits] = React.useState<Permit[]>(initialPermits);
 
-  const stats = [
-    { title: 'Active Permits', value: '24', change: '+12%' },
-    { title: 'Pending Approval', value: '5', change: '-3%' },
-    { title: 'High Risk Today', value: '3', change: '+1%' },
-    { title: 'Compliance Rate', value: '92%', change: '+4%' },
-  ];
+  const stats = React.useMemo(() => {
+    const activePermits = permits.filter(
+      p => p.status === 'Approved' || p.status === 'Pending'
+    ).length;
+    const pendingApproval = permits.filter(p => p.status === 'Pending').length;
+    const highRiskToday = permits.filter(p => p.riskLevel === 'high').length;
+
+    return [
+      {
+        title: 'Active Permits',
+        value: activePermits.toString(),
+        change: '+12%',
+      },
+      {
+        title: 'Pending Approval',
+        value: pendingApproval.toString(),
+        change: '-3%',
+      },
+      {
+        title: 'High Risk Today',
+        value: highRiskToday.toString(),
+        change: '+1%',
+      },
+      { title: 'Compliance Rate', value: '92%', change: '+4%' }, // Mocked
+    ];
+  }, [permits]);
 
   const handlePermitCreated = (newPermit: Permit) => {
-    setPermits(prev => [newPermit, ...prev].slice(0,4));
+    setPermits(prev => [newPermit, ...prev]);
     setIsFormOpen(false);
   };
+
+  const recentPermits = permits.slice(0, 4);
 
   return (
     <>
@@ -51,14 +73,17 @@ export default function Home() {
         <div className="bg-card rounded-xl shadow-sm p-4 md:p-6 mb-8 border">
           <h2 className="text-xl font-bold mb-4">Recent Permits</h2>
           <div className="space-y-4">
-            {permits.map((permit, index) => (
+            {recentPermits.map(permit => (
               <PermitCard
-                key={index}
+                key={permit.id}
                 id={permit.id}
                 type="Work Permit"
                 location="Plant Area"
-                risk={permit.riskLevel as any}
-                status="Approved"
+                risk={
+                  permit.riskLevel.charAt(0).toUpperCase() +
+                  permit.riskLevel.slice(1) as any
+                }
+                status={permit.status}
               />
             ))}
           </div>

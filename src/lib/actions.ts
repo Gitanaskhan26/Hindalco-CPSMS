@@ -51,6 +51,7 @@ export async function createPermit(
       description,
       ppeChecklist,
       ...assessment,
+      status: 'Approved',
       // Mock location for demo purposes. In a real app, this would come from the user.
       lat: 22.5726 + (Math.random() - 0.5) * 0.1,
       lng: 88.3639 + (Math.random() - 0.5) * 0.1,

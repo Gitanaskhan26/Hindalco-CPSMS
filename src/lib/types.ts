@@ -1,4 +1,5 @@
 export type RiskLevel = 'low' | 'medium' | 'high';
+export type PermitStatus = 'Approved' | 'Pending' | 'Rejected';
 
 export type Permit = {
   id: string;
@@ -9,4 +10,5 @@ export type Permit = {
   lat: number;
   lng: number;
   qrCodeUrl: string;
+  status: PermitStatus;
 };
