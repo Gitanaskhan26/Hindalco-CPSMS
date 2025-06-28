@@ -1,7 +1,7 @@
 'use client';
 
 import * as React from 'react';
-import { useFormState, useFormStatus } from 'react-dom';
+import { useFormStatus } from 'react-dom';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
@@ -66,7 +66,7 @@ export function PermitForm({
   onPermitCreated,
 }: PermitFormProps) {
   const { toast } = useToast();
-  const [state, formAction] = useFormState(createPermit, { message: '' });
+  const [state, formAction] = React.useActionState(createPermit, { message: '' });
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -74,7 +74,7 @@ export function PermitForm({
       description: '',
       ppeChecklist: '',
     },
-    // Sync with useFormState
+    // Sync with useActionState
     errors: state?.errors,
   });
 
