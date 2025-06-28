@@ -12,8 +12,8 @@ export const HindalcoHeader = () => {
 
   const navItems = [
     { label: 'Dashboard', href: '/', icon: LayoutDashboard },
-    { label: 'Permits', href: '#', icon: FileText },
-    { label: 'Plant Map', href: '#', icon: Map },
+    { label: 'Permits', href: '/permits', icon: FileText },
+    { label: 'Plant Map', href: '/map', icon: Map },
   ];
 
   return (

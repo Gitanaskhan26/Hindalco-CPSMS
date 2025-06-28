@@ -25,8 +25,8 @@ const FooterItem = ({ icon: Icon, label, path }: { icon: React.ElementType; labe
 export const HindalcoFooter = () => {
   const navItems = [
     { label: 'Home', href: '/', icon: Home },
-    { label: 'Permits', href: '#', icon: FileText },
-    { label: 'Map', href: '#', icon: Map },
+    { label: 'Permits', href: '/permits', icon: FileText },
+    { label: 'Map', href: '/map', icon: Map },
     { label: 'Account', href: '#', icon: User },
   ];
 
