@@ -38,7 +38,7 @@ export async function createPermit(
     const { description, ppeChecklist } = validatedFields.data;
     const assessment = await assessPermitRisk({ description, ppeChecklist });
 
-    const id = new Date().toISOString();
+    const id = crypto.randomUUID();
     const riskLevel = assessment.riskLevel;
     
     const permitData = JSON.stringify({ id, risk: riskLevel });
