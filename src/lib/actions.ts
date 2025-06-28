@@ -38,20 +38,23 @@ export async function createPermit(
     const { description, ppeChecklist } = validatedFields.data;
     const assessment = await assessPermitRisk({ description, ppeChecklist });
 
+    const id = new Date().toISOString();
+    const riskLevel = assessment.riskLevel;
+    
+    const permitData = JSON.stringify({ id, risk: riskLevel });
+    const qrCodeUrl = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(
+      permitData
+    )}`;
+
     const newPermit: Permit = {
-      id: new Date().toISOString(),
+      id,
       description,
       ppeChecklist,
       ...assessment,
       // Mock location for demo purposes. In a real app, this would come from the user.
       lat: 22.5726 + (Math.random() - 0.5) * 0.1,
       lng: 88.3639 + (Math.random() - 0.5) * 0.1,
-      get qrCodeUrl() {
-        const permitData = JSON.stringify({ id: this.id, risk: this.riskLevel });
-        return `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(
-          permitData
-        )}`;
-      },
+      qrCodeUrl,
     };
 
     return { message: 'Permit created successfully.', permit: newPermit };
