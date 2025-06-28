@@ -27,13 +27,13 @@ interface MapViewProps {
 export function MapView({ permits, selectedPermit, onMarkerClick }: MapViewProps) {
   const apiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY;
 
-  if (!apiKey) {
+  if (!apiKey || apiKey === 'YOUR_API_KEY_HERE') {
     return (
       <div className="flex h-full w-full items-center justify-center bg-muted">
-        <div className="text-center">
+        <div className="text-center p-4">
           <p className="text-lg font-semibold">Map Unavailable</p>
           <p className="text-sm text-muted-foreground">
-            Google Maps API key is not configured.
+            Google Maps API key is not configured. Please add it to your .env file.
           </p>
         </div>
       </div>
