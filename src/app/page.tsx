@@ -41,10 +41,10 @@ export default function Home() {
     ];
   }, [permits]);
 
-  const handlePermitCreated = (newPermit: Permit) => {
+  const handlePermitCreated = React.useCallback((newPermit: Permit) => {
     setPermits(prev => [newPermit, ...prev]);
     setIsFormOpen(false);
-  };
+  }, []);
 
   const recentPermits = permits.slice(0, 4);
 

@@ -21,11 +21,11 @@ export default function MapPage() {
   const [isFormOpen, setIsFormOpen] = React.useState(false);
   const [qrPermit, setQrPermit] = React.useState<Permit | null>(null);
 
-  const handlePermitCreated = (newPermit: Permit) => {
+  const handlePermitCreated = React.useCallback((newPermit: Permit) => {
     setPermits(prev => [newPermit, ...prev]);
     setSelectedPermit(newPermit);
     setIsFormOpen(false);
-  };
+  }, []);
 
   const handleSelectPermit = (permit: Permit) => {
     setSelectedPermit(permit);

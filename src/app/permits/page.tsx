@@ -20,10 +20,10 @@ export default function PermitsPage() {
   const [permits, setPermits] = React.useState<Permit[]>(initialPermits);
   const [riskFilter, setRiskFilter] = React.useState('all');
 
-  const handlePermitCreated = (newPermit: Permit) => {
+  const handlePermitCreated = React.useCallback((newPermit: Permit) => {
     setPermits(prev => [newPermit, ...prev]);
     setIsFormOpen(false);
-  };
+  }, []);
 
   const filteredPermits = permits.filter(permit => {
     if (riskFilter === 'all') return true;
