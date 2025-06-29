@@ -53,52 +53,50 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
   const loginVisitor = async (visitorId: string, dob: string): Promise<boolean> => {
     setIsLoading(true);
     const visitor = await fetchVisitorDetails(visitorId, dob);
-    if (visitor) {
-      if (navigator.geolocation) {
-        try {
-          const position = await new Promise<GeolocationPosition>((resolve, reject) => {
-            navigator.geolocation.getCurrentPosition(resolve, reject, {
-              enableHighAccuracy: true,
-              timeout: 10000,
-              maximumAge: 0,
-            });
-          });
+    if (!visitor) {
+      setIsLoading(false);
+      return false;
+    }
 
-          const locatedVisitor: Visitor = {
-            ...visitor,
-            lat: position.coords.latitude,
-            lng: position.coords.longitude,
-          };
-          setUser(locatedVisitor);
-          localStorage.setItem('user', JSON.stringify(locatedVisitor));
-        } catch (error) {
-          console.error("Could not get visitor location.", error);
-          toast({
-            variant: 'destructive',
-            title: 'Location Access Denied',
-            description: 'Please enable location permissions in your browser to capture your location.',
-          });
-          // Fallback to login without location
-          setUser(visitor);
-          localStorage.setItem('user', JSON.stringify(visitor));
-        }
-      } else {
-        console.error("Geolocation is not supported by this browser.");
-        toast({
-          variant: 'destructive',
-          title: 'Location Not Supported',
-          description: 'Your browser does not support geolocation.',
+    if (!navigator.geolocation) {
+      console.error("Geolocation is not supported by this browser.");
+      toast({
+        variant: 'destructive',
+        title: 'Location Not Supported',
+        description: 'Your browser does not support geolocation. Please use a different browser.',
+      });
+      setIsLoading(false);
+      return false;
+    }
+
+    try {
+      const position = await new Promise<GeolocationPosition>((resolve, reject) => {
+        navigator.geolocation.getCurrentPosition(resolve, reject, {
+          enableHighAccuracy: true,
+          timeout: 10000,
+          maximumAge: 0,
         });
-        // Fallback to login without location
-        setUser(visitor);
-        localStorage.setItem('user', JSON.stringify(visitor));
-      }
-      
+      });
+
+      const locatedVisitor: Visitor = {
+        ...visitor,
+        lat: position.coords.latitude,
+        lng: position.coords.longitude,
+      };
+      setUser(locatedVisitor);
+      localStorage.setItem('user', JSON.stringify(locatedVisitor));
       setIsLoading(false);
       return true;
+    } catch (error) {
+      console.error("Could not get visitor location.", error);
+      toast({
+        variant: 'destructive',
+        title: 'Location Access Required',
+        description: 'Please enable location permissions in your browser to log in. This is required to generate a valid visitor pass.',
+      });
+      setIsLoading(false);
+      return false;
     }
-    setIsLoading(false);
-    return false;
   };
 
   const logout = () => {
