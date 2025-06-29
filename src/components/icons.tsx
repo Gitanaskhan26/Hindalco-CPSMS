@@ -6,27 +6,18 @@ interface LogoProps {
   className?: string;
 }
 
-// A placeholder Logo component to prevent rendering errors.
-// This can be replaced with the actual SVG or image component for the logo.
-export const Logo = ({ width = 80, height = 19, className }: LogoProps) => {
+export const Logo = ({ width, height, className }: LogoProps) => {
   return (
-    <div
+    <img
+      src="https://storage.googleapis.com/project-spark-b20f9.appspot.com/static/a4816666-6467-4222-9993-9d0a6230f30c"
+      alt="Hindalco C-PSMS Logo"
+      width={typeof width === 'string' ? undefined : width}
+      height={typeof height === 'string' ? undefined : height}
       className={className}
       style={{
-        width: typeof width === 'string' ? width : `${width}px`,
-        height: typeof height === 'string' ? height : `${height}px`,
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        backgroundColor: '#E67326',
-        color: '#FFFFFF',
-        fontSize: '12px',
-        fontWeight: 'bold',
-        borderRadius: '4px',
+        width: width ? (typeof width === 'string' ? width : `${width}px`) : 'auto',
+        height: height ? (typeof height === 'string' ? height : `${height}px`) : 'auto',
       }}
-      aria-label="Hindalco Logo"
-    >
-      HINDALCO
-    </div>
+    />
   );
 };
