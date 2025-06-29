@@ -2,7 +2,6 @@
 
 import 'leaflet/dist/leaflet.css';
 import * as React from 'react';
-import { MapContainer, TileLayer, useMap } from 'react-leaflet';
 import L from 'leaflet';
 import type { Permit, RiskLevel } from '@/lib/types';
 import { renderToStaticMarkup } from 'react-dom/server';
@@ -58,73 +57,7 @@ const createPopupContent = (permit: Permit) => {
 };
 
 
-// --- Map Controller Component ---
-// This component handles all the dynamic logic: markers, popups, and view changes.
-
-interface MapControllerProps {
-  permits: Permit[];
-  selectedPermit: Permit | null;
-  onMarkerClick: (permit: Permit | null) => void;
-}
-
-function MapController({ permits, selectedPermit, onMarkerClick }: MapControllerProps) {
-  const map = useMap();
-  const markersRef = React.useRef<Record<string, L.Marker>>({});
-
-  // Effect to add/update/remove markers when permits change
-  React.useEffect(() => {
-    const currentMarkers = markersRef.current;
-    const newMarkers: Record<string, L.Marker> = {};
-
-    // Add or update markers
-    permits.forEach(permit => {
-      let marker;
-      if (currentMarkers[permit.id]) {
-        // Marker exists, just move it to the new marker list
-        marker = currentMarkers[permit.id];
-        delete currentMarkers[permit.id];
-      } else {
-        // Marker is new, create it
-        const icon = createCustomIcon(permit.riskLevel);
-        marker = L.marker([permit.lat, permit.lng], { icon })
-          .addTo(map)
-          .on('click', () => onMarkerClick(permit));
-      }
-      marker.bindPopup(createPopupContent(permit));
-      newMarkers[permit.id] = marker;
-    });
-
-    // Remove old markers that are no longer in the permits list
-    Object.values(currentMarkers).forEach(marker => marker.removeFrom(map));
-    
-    // Update the ref
-    markersRef.current = newMarkers;
-
-  }, [permits, map, onMarkerClick]);
-
-
-  // Effect to fly to and open popup for the selected permit
-  React.useEffect(() => {
-    if (selectedPermit && markersRef.current[selectedPermit.id]) {
-        const marker = markersRef.current[selectedPermit.id];
-        map.flyTo(marker.getLatLng(), 15, {
-            animate: true,
-            duration: 0.5
-        });
-        // A small delay helps ensure the flyTo is complete before opening popup
-        setTimeout(() => {
-            if (map.hasLayer(marker)) {
-              marker.openPopup();
-            }
-        }, 500)
-    }
-  }, [selectedPermit, map]);
-
-  return null; // This component does not render anything itself
-}
-
-
-// --- Map View Component (The Main, Stable Container) ---
+// --- Map View Component (Imperative Approach) ---
 
 interface MapViewProps {
   permits: Permit[];
@@ -133,25 +66,90 @@ interface MapViewProps {
 }
 
 export default function MapView({ permits, selectedPermit, onMarkerClick }: MapViewProps) {
-  const defaultPosition: L.LatLngExpression = [22.5726, 88.3639];
+    const mapContainerRef = React.useRef<HTMLDivElement>(null);
+    const mapInstanceRef = React.useRef<L.Map | null>(null);
+    const markersRef = React.useRef<Record<string, L.Marker>>({});
 
-  return (
-    <MapContainer
-      center={defaultPosition}
-      zoom={13}
-      style={{ height: '100%', width: '100%' }}
-      scrollWheelZoom={true}
-      className="z-0"
-    >
-      <TileLayer
-        attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-        url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-      />
-      <MapController
-        permits={permits}
-        selectedPermit={selectedPermit}
-        onMarkerClick={onMarkerClick}
-      />
-    </MapContainer>
-  );
+    // Effect to initialize the map
+    React.useEffect(() => {
+        if (mapContainerRef.current && !mapInstanceRef.current) {
+            const map = L.map(mapContainerRef.current, {
+                center: [22.5726, 88.3639],
+                zoom: 13,
+                scrollWheelZoom: true,
+            });
+
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+            }).addTo(map);
+
+            mapInstanceRef.current = map;
+        }
+        
+        // Cleanup function to destroy the map instance on unmount
+        return () => {
+            if (mapInstanceRef.current) {
+                mapInstanceRef.current.remove();
+                mapInstanceRef.current = null;
+            }
+        };
+    }, []); // Empty dependency array ensures this runs only once on mount
+
+    // Effect to manage markers based on permit data
+    React.useEffect(() => {
+        const map = mapInstanceRef.current;
+        if (!map) return;
+
+        const currentMarkers = markersRef.current;
+        const newMarkers: Record<string, L.Marker> = {};
+
+        permits.forEach(permit => {
+            let marker;
+            if (currentMarkers[permit.id]) {
+                marker = currentMarkers[permit.id];
+                delete currentMarkers[permit.id];
+            } else {
+                const icon = createCustomIcon(permit.riskLevel);
+                marker = L.marker([permit.lat, permit.lng], { icon })
+                    .addTo(map)
+                    .on('click', () => onMarkerClick(permit));
+            }
+            marker.bindPopup(createPopupContent(permit));
+            newMarkers[permit.id] = marker;
+        });
+
+        // Remove old markers that are no longer in the permits list
+        Object.values(currentMarkers).forEach(marker => marker.removeFrom(map));
+        markersRef.current = newMarkers;
+
+    }, [permits, onMarkerClick]);
+
+    // Effect to handle selecting a permit
+    React.useEffect(() => {
+        const map = mapInstanceRef.current;
+        if (!map) return;
+
+        if (selectedPermit && markersRef.current[selectedPermit.id]) {
+            const marker = markersRef.current[selectedPermit.id];
+            map.flyTo(marker.getLatLng(), 15, {
+                animate: true,
+                duration: 0.5
+            });
+            // A small delay helps ensure the flyTo is complete before opening popup
+            setTimeout(() => {
+                if (map.hasLayer(marker)) {
+                    marker.openPopup();
+                }
+            }, 500);
+        }
+    }, [selectedPermit]);
+
+
+    return (
+        <div 
+            ref={mapContainerRef} 
+            style={{ height: '100%', width: '100%' }} 
+            className="z-0"
+        />
+    );
 }
