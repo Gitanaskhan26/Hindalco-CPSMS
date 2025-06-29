@@ -2,8 +2,9 @@
 
 import * as React from 'react';
 import { useRouter } from 'next/navigation';
-import { fetchEmployeeDetails, type Employee } from '@/lib/employee-data';
-import { fetchVisitorDetails, type Visitor } from '@/lib/visitor-data';
+import { fetchEmployeeDetails } from '@/lib/employee-data';
+import { fetchVisitorDetails } from '@/lib/visitor-data';
+import type { Employee, Visitor } from '@/lib/types';
 import { useToast } from '@/hooks/use-toast';
 
 type AuthenticatedUser = Employee | Visitor;
@@ -60,12 +61,12 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
     }
 
     if (!navigator.geolocation) {
-      console.error("Geolocation is not supported by this browser.");
       toast({
         variant: 'destructive',
         title: 'Location Not Supported',
         description: 'Your browser does not support geolocation. The QR pass cannot be generated.',
       });
+      // Log in anyway, but without location.
       setUser(visitor);
       localStorage.setItem('user', JSON.stringify(visitor));
       setIsLoading(false);

@@ -1,11 +1,4 @@
-export interface Employee {
-  id: string; // Employee Code
-  dob: string; // YYYY-MM-DD
-  name: string;
-  avatarUrl: string;
-  avatarHint: string;
-  type: 'employee';
-}
+import type { Employee } from './types';
 
 export const mockEmployees: Omit<Employee, 'type'>[] = [
   {

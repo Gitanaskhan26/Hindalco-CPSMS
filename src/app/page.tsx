@@ -3,16 +3,27 @@
 import * as React from 'react';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
-import { Plus, ScanLine, Map, ShieldCheck } from 'lucide-react';
+import { Plus, ScanLine, Map, ShieldCheck, Users } from 'lucide-react';
 import { StatsCard } from '@/components/dashboard/stats-card';
 import { PermitCard } from '@/components/dashboard/permit-card';
+import { VisitorCard } from '@/components/dashboard/visitor-card';
 import { PermitForm } from '@/components/permit-form';
-import type { Permit } from '@/lib/types';
+import type { Permit, Visitor } from '@/lib/types';
 import { initialPermits } from '@/lib/data';
+import { fetchAllVisitors } from '@/lib/visitor-data';
 
 export default function Home() {
   const [isFormOpen, setIsFormOpen] = React.useState(false);
   const [permits, setPermits] = React.useState<Permit[]>(initialPermits);
+  const [visitors, setVisitors] = React.useState<Visitor[]>([]);
+
+  React.useEffect(() => {
+    const loadVisitors = async () => {
+        const activeVisitors = await fetchAllVisitors();
+        setVisitors(activeVisitors);
+    };
+    loadVisitors();
+  }, []);
 
   const stats = React.useMemo(() => {
     const activePermits = permits.filter(
@@ -20,6 +31,7 @@ export default function Home() {
     ).length;
     const pendingApproval = permits.filter(p => p.status === 'Pending').length;
     const highRiskToday = permits.filter(p => p.riskLevel === 'high').length;
+    const activeVisitors = visitors.length;
 
     return [
       {
@@ -37,9 +49,14 @@ export default function Home() {
         value: highRiskToday.toString(),
         change: '+1%',
       },
-      { title: 'Compliance Rate', value: '92%', change: '+4%' }, // Mocked
+      { 
+        title: 'Active Visitors', 
+        value: activeVisitors.toString(), 
+        change: `+${activeVisitors}`,
+        icon: Users
+      },
     ];
-  }, [permits]);
+  }, [permits, visitors]);
 
   const handlePermitCreated = React.useCallback((newPermit: Permit) => {
     setPermits(prev => [newPermit, ...prev]);
@@ -88,6 +105,20 @@ export default function Home() {
             ))}
           </div>
         </div>
+
+        <div className="bg-card rounded-xl shadow-sm p-4 md:p-6 mb-8 border">
+          <h2 className="text-xl font-bold mb-4">Active Visitors</h2>
+          <div className="space-y-4">
+            {visitors.length > 0 ? (
+                visitors.map(visitor => (
+                    <VisitorCard key={visitor.id} visitor={visitor} />
+                ))
+            ) : (
+                <p className="text-muted-foreground text-sm">No active visitors found.</p>
+            )}
+          </div>
+        </div>
+
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <Button

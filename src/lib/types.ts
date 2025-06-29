@@ -12,3 +12,25 @@ export type Permit = {
   qrCodeUrl: string;
   status: PermitStatus;
 };
+
+export interface Employee {
+  id: string; // Employee Code
+  dob: string; // YYYY-MM-DD
+  name: string;
+  avatarUrl: string;
+  avatarHint: string;
+  type: 'employee';
+}
+
+export interface Visitor {
+  id: string; // Visitor ID
+  dob: string; // YYYY-MM-DD
+  name: string;
+  avatarUrl: string;
+  avatarHint: string;
+  entryTime: string; // ISO 8601 string
+  validUntil: string; // ISO 8601 string
+  type: 'visitor';
+  lat?: number;
+  lng?: number;
+}

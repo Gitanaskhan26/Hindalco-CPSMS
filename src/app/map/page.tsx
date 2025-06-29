@@ -13,8 +13,9 @@ import { PermitForm } from '@/components/permit-form';
 import { QRDialog } from '@/components/qr-dialog';
 import { Skeleton } from '@/components/ui/skeleton';
 
-import type { Permit } from '@/lib/types';
+import type { Permit, Visitor } from '@/lib/types';
 import { initialPermits } from '@/lib/data';
+import { fetchAllVisitors } from '@/lib/visitor-data';
 
 // Dynamically import the MapView component as the default export.
 const MapView = dynamic(() => import('@/components/map-view'), {
@@ -24,24 +25,44 @@ const MapView = dynamic(() => import('@/components/map-view'), {
 
 export default function MapPage() {
   const [permits, setPermits] = React.useState<Permit[]>(initialPermits);
+  const [visitors, setVisitors] = React.useState<Visitor[]>([]);
   const [selectedPermit, setSelectedPermit] = React.useState<Permit | null>(null);
+  const [selectedVisitor, setSelectedVisitor] = React.useState<Visitor | null>(null);
   const [isFormOpen, setIsFormOpen] = React.useState(false);
   const [qrPermit, setQrPermit] = React.useState<Permit | null>(null);
   const searchParams = useSearchParams();
 
-  // Effect to handle selecting a permit from the URL or defaulting to the first one.
+  // Effect to fetch visitors
+  React.useEffect(() => {
+    const loadVisitors = async () => {
+        const allVisitors = await fetchAllVisitors();
+        setVisitors(allVisitors);
+    };
+    loadVisitors();
+  }, []);
+
+  // Effect to handle selecting a permit or visitor from the URL.
   React.useEffect(() => {
     const permitId = searchParams.get('permitId');
-    const permitFromUrl = permitId ? permits.find(p => p.id === permitId) : null;
+    const visitorId = searchParams.get('visitorId');
 
-    if (permitFromUrl) {
-      if (selectedPermit?.id !== permitFromUrl.id) {
+    if (visitorId && visitors.length > 0) {
+        const visitorFromUrl = visitors.find(v => v.id === visitorId);
+        if (visitorFromUrl) {
+            setSelectedVisitor(visitorFromUrl);
+            setSelectedPermit(null);
+        }
+    } else if (permitId && permits.length > 0) {
+      const permitFromUrl = permits.find(p => p.id === permitId);
+      if (permitFromUrl) {
         setSelectedPermit(permitFromUrl);
+        setSelectedVisitor(null);
       }
-    } else if (!selectedPermit && permits.length > 0) {
+    } else if (!selectedPermit && !selectedVisitor && permits.length > 0) {
+      // Default to selecting the first permit if nothing else is selected
       setSelectedPermit(permits[0]);
     }
-  }, [searchParams, permits, selectedPermit]);
+  }, [searchParams, permits, visitors, selectedPermit, selectedVisitor]);
 
   const handlePermitCreated = React.useCallback((newPermit: Permit) => {
     setPermits(prev => [newPermit, ...prev]);
@@ -51,6 +72,7 @@ export default function MapPage() {
 
   const handleSelectPermit = React.useCallback((permit: Permit) => {
     setSelectedPermit(permit);
+    setSelectedVisitor(null);
   }, []);
 
   const handleViewQr = React.useCallback((permit: Permit) => {
@@ -59,6 +81,12 @@ export default function MapPage() {
 
   const handleMarkerClick = React.useCallback((permit: Permit | null) => {
     setSelectedPermit(permit);
+    setSelectedVisitor(null);
+  }, []);
+
+  const handleVisitorMarkerClick = React.useCallback((visitor: Visitor | null) => {
+    setSelectedVisitor(visitor);
+    setSelectedPermit(null);
   }, []);
 
   const handleCloseQrDialog = React.useCallback(() => {
@@ -97,6 +125,9 @@ export default function MapPage() {
             permits={permits}
             selectedPermit={selectedPermit}
             onMarkerClick={handleMarkerClick}
+            visitors={visitors}
+            selectedVisitor={selectedVisitor}
+            onVisitorMarkerClick={handleVisitorMarkerClick}
           />
         </main>
       </div>

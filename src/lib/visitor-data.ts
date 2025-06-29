@@ -1,19 +1,7 @@
 'use client';
+import type { Visitor } from './types';
 
-export interface Visitor {
-  id: string; // Visitor ID
-  dob: string; // YYYY-MM-DD
-  name: string;
-  avatarUrl: string;
-  avatarHint: string;
-  entryTime: string; // ISO 8601 string
-  validUntil: string; // ISO 8601 string
-  type: 'visitor';
-  lat?: number;
-  lng?: number;
-}
-
-export const mockVisitors: Omit<Visitor, 'type' | 'lat' | 'lng'>[] = [
+export const mockVisitors: Omit<Visitor, 'type'>[] = [
   {
     id: 'V-98765',
     dob: '1988-11-22',
@@ -22,6 +10,8 @@ export const mockVisitors: Omit<Visitor, 'type' | 'lat' | 'lng'>[] = [
     avatarHint: 'man portrait glasses',
     entryTime: new Date().toISOString(),
     validUntil: new Date(new Date().setDate(new Date().getDate() + 7)).toISOString(), // Valid for 7 days
+    lat: 24.2085,
+    lng: 83.0416,
   },
   {
     id: 'V-12345',
@@ -31,6 +21,8 @@ export const mockVisitors: Omit<Visitor, 'type' | 'lat' | 'lng'>[] = [
     avatarHint: 'woman portrait smiling',
     entryTime: new Date(new Date().setHours(new Date().getHours() - 2)).toISOString(), // Entered 2 hours ago
     validUntil: new Date(new Date().setHours(new Date().getHours() + 6)).toISOString(), // Valid for 8 hours total
+    lat: 24.2015,
+    lng: 83.0381,
   },
 ];
 
@@ -48,3 +40,9 @@ export const fetchVisitorDetails = async (visitorId: string, dob: string): Promi
   
   return null;
 };
+
+// Mock function for employees to fetch all active visitors
+export const fetchAllVisitors = async (): Promise<Visitor[]> => {
+    await new Promise(resolve => setTimeout(resolve, 200)); // simulate network delay
+    return mockVisitors.map(v => ({ ...v, type: 'visitor' }));
+}

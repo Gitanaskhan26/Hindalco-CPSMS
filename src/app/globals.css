@@ -87,3 +87,24 @@
     border: none !important;
   }
 }
+
+@layer utilities {
+  @keyframes glow {
+    from {
+      box-shadow: 0 0 2px 0px hsl(var(--accent)), 0 0 2px 0px hsl(var(--accent));
+    }
+    to {
+      box-shadow: 0 0 2px 2px hsl(var(--accent)), 0 0 4px 4px hsla(var(--accent) / 0.5);
+    }
+  }
+
+  .visitor-marker-dot {
+    background-color: hsl(var(--accent));
+    width: 1rem;
+    height: 1rem;
+    border-radius: 9999px;
+    border: 2px solid #fff;
+    box-shadow: 0 0 0 2px hsl(var(--accent));
+    animation: glow 1.5s infinite alternate;
+  }
+}
