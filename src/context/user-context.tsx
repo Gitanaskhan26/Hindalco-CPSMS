@@ -4,6 +4,7 @@ import * as React from 'react';
 import { useRouter } from 'next/navigation';
 import { fetchEmployeeDetails, type Employee } from '@/lib/employee-data';
 import { fetchVisitorDetails, type Visitor } from '@/lib/visitor-data';
+import { useToast } from '@/hooks/use-toast';
 
 type AuthenticatedUser = Employee | Visitor;
 
@@ -21,6 +22,7 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = React.useState<AuthenticatedUser | null>(null);
   const [isLoading, setIsLoading] = React.useState(true);
   const router = useRouter();
+  const { toast } = useToast();
 
   React.useEffect(() => {
     try {
@@ -71,12 +73,22 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
           localStorage.setItem('user', JSON.stringify(locatedVisitor));
         } catch (error) {
           console.error("Could not get visitor location.", error);
+          toast({
+            variant: 'destructive',
+            title: 'Location Access Denied',
+            description: 'Please enable location permissions in your browser to capture your location.',
+          });
           // Fallback to login without location
           setUser(visitor);
           localStorage.setItem('user', JSON.stringify(visitor));
         }
       } else {
         console.error("Geolocation is not supported by this browser.");
+        toast({
+          variant: 'destructive',
+          title: 'Location Not Supported',
+          description: 'Your browser does not support geolocation.',
+        });
         // Fallback to login without location
         setUser(visitor);
         localStorage.setItem('user', JSON.stringify(visitor));
