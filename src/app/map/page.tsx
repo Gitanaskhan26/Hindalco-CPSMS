@@ -2,13 +2,14 @@
 
 import * as React from 'react';
 import { Plus } from 'lucide-react';
+import dynamic from 'next/dynamic';
 
 import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { MapView } from '@/components/map-view';
 import { PermitCard } from '@/components/permit-card';
 import { PermitForm } from '@/components/permit-form';
 import { QRDialog } from '@/components/qr-dialog';
+import { Skeleton } from '@/components/ui/skeleton';
 
 import type { Permit } from '@/lib/types';
 import { initialPermits } from '@/lib/data';
@@ -20,6 +21,14 @@ export default function MapPage() {
   );
   const [isFormOpen, setIsFormOpen] = React.useState(false);
   const [qrPermit, setQrPermit] = React.useState<Permit | null>(null);
+
+  const MapView = React.useMemo(() => dynamic(
+    () => import('@/components/map-view').then((mod) => mod.MapView),
+    { 
+      loading: () => <Skeleton className="h-full w-full" />,
+      ssr: false 
+    }
+  ), []);
 
   const handlePermitCreated = React.useCallback((newPermit: Permit) => {
     setPermits(prev => [newPermit, ...prev]);
@@ -34,6 +43,10 @@ export default function MapPage() {
   const handleViewQr = (permit: Permit) => {
     setQrPermit(permit);
   };
+
+  const handleMarkerClick = (permit: Permit | null) => {
+      setSelectedPermit(permit);
+  }
 
   return (
     <>
@@ -66,7 +79,7 @@ export default function MapPage() {
           <MapView 
             permits={permits}
             selectedPermit={selectedPermit}
-            onMarkerClick={(permit) => setSelectedPermit(permit)}
+            onMarkerClick={handleMarkerClick}
           />
         </main>
       </div>
