@@ -81,4 +81,9 @@
   body {
     @apply bg-background text-foreground;
   }
+  /* Custom Leaflet Icon Styling */
+  .leaflet-custom-div-icon {
+    background: transparent !important;
+    border: none !important;
+  }
 }

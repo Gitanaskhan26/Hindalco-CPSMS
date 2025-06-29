@@ -11,23 +11,47 @@ import { CardHeader, CardContent, CardTitle } from './ui/card';
 // --- Helper Functions and Constants ---
 
 const riskColorMap: Record<RiskLevel, string> = {
-  high: '#EF4444',
-  medium: '#F97316',
-  low: '#22C55E',
+  high: '#EF4444', // red-500
+  medium: '#F97316', // orange-500
+  low: '#22C55E', // green-500
 };
 
-const createCustomIcon = (riskLevel: RiskLevel) => {
+// Use an SVG-based map pin icon.
+const createCustomIcon = (riskLevel: RiskLevel, isSelected: boolean) => {
+  const color = riskColorMap[riskLevel];
+  const scale = isSelected ? 1.5 : 1;
+
+  // Using an inline SVG for the marker icon
+  const svgIcon = `
+    <div class="transition-transform duration-100 ease-out" style="transform: scale(${scale}); transform-origin: bottom;">
+      <svg 
+        xmlns="http://www.w3.org/2000/svg" 
+        width="28" 
+        height="28" 
+        viewBox="0 0 24 24" 
+        fill="${color}" 
+        stroke="white" 
+        stroke-width="1.5" 
+        stroke-linecap="round" 
+        stroke-linejoin="round"
+        style="filter: drop-shadow(0 2px 3px rgba(0,0,0,0.4));"
+      >
+        <path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/>
+        <circle cx="12" cy="10" r="3" fill="white"/>
+      </svg>
+    </div>
+  `;
+
   return L.divIcon({
-    html: `<span style="background-color: ${riskColorMap[riskLevel]}; width: 1.5rem; height: 1.5rem; display: block; border-radius: 50%; border: 2px solid white; box-shadow: 0 0 5px rgba(0,0,0,0.5);"></span>`,
-    className: '',
-    iconSize: [24, 24],
-    iconAnchor: [12, 24],
-    popupAnchor: [0, -24],
+    html: svgIcon,
+    className: 'leaflet-custom-div-icon', // Custom class to remove default divIcon styles
+    iconSize: [28, 28],
+    iconAnchor: [14, 28], // Point of the pin
+    popupAnchor: [0, -28],
   });
 };
 
 const createPopupContent = (permit: Permit) => {
-  // We use renderToStaticMarkup to convert React components to an HTML string
   return renderToStaticMarkup(
     <div className="w-64 p-0 m-0 font-sans">
       <CardHeader className="p-2">
@@ -57,7 +81,7 @@ const createPopupContent = (permit: Permit) => {
 };
 
 
-// --- Map View Component (Imperative Approach) ---
+// --- Map View Component ---
 
 interface MapViewProps {
   permits: Permit[];
@@ -65,85 +89,79 @@ interface MapViewProps {
   onMarkerClick: (permit: Permit | null) => void;
 }
 
-const defaultPosition: L.LatLngTuple = [24.2045, 83.0396]; // Hindalco Plant, Renukoot
+const defaultPosition: L.LatLngTuple = [24.2045, 83.0396];
 
 export default function MapView({ permits, selectedPermit, onMarkerClick }: MapViewProps) {
     const mapContainerRef = React.useRef<HTMLDivElement>(null);
     const mapInstanceRef = React.useRef<L.Map | null>(null);
     const markersRef = React.useRef<Record<string, L.Marker>>({});
+    const prevSelectedIdRef = React.useRef<string | null>(null);
 
-    // Effect to initialize the map
+    // Initialize map
     React.useEffect(() => {
         if (mapContainerRef.current && !mapInstanceRef.current) {
-            const map = L.map(mapContainerRef.current).setView(defaultPosition, 14);
-
+            const map = L.map(mapContainerRef.current, { zoomControl: false }).setView(defaultPosition, 14);
+            L.control.zoom({ position: 'bottomright' }).addTo(map);
             L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
                 attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
             }).addTo(map);
-
             mapInstanceRef.current = map;
         }
-        
-        // Cleanup function to destroy the map instance on unmount
         return () => {
-            if (mapInstanceRef.current) {
-                mapInstanceRef.current.remove();
-                mapInstanceRef.current = null;
-            }
+            mapInstanceRef.current?.remove();
+            mapInstanceRef.current = null;
         };
-    }, []); // Empty dependency array ensures this runs only once on mount
+    }, []);
 
-    // Effect to manage markers based on permit data
+    // Sync markers with permits and selection
     React.useEffect(() => {
         const map = mapInstanceRef.current;
         if (!map) return;
 
-        const currentMarkers = markersRef.current;
-        const newMarkers: Record<string, L.Marker> = {};
-
+        const displayedMarkerIds = new Set(Object.keys(markersRef.current));
+        
         permits.forEach(permit => {
-            let marker;
+            const isSelected = selectedPermit?.id === permit.id;
+            const icon = createCustomIcon(permit.riskLevel, isSelected);
             const position: L.LatLngTuple = [permit.lat, permit.lng];
 
-            if (currentMarkers[permit.id]) {
-                marker = currentMarkers[permit.id];
+            if (markersRef.current[permit.id]) {
+                const marker = markersRef.current[permit.id];
                 marker.setLatLng(position);
-                delete currentMarkers[permit.id];
+                marker.setIcon(icon);
+                if (isSelected) {
+                    marker.setZIndexOffset(1000);
+                } else {
+                    marker.setZIndexOffset(0);
+                }
+                displayedMarkerIds.delete(permit.id);
             } else {
-                const icon = createCustomIcon(permit.riskLevel);
-                marker = L.marker(position, { icon })
+                const marker = L.marker(position, { icon })
                     .addTo(map)
                     .on('click', () => onMarkerClick(permit));
+                marker.bindPopup(createPopupContent(permit));
+                markersRef.current[permit.id] = marker;
             }
-            marker.bindPopup(createPopupContent(permit));
-            newMarkers[permit.id] = marker;
         });
 
-        // Remove old markers that are no longer in the permits list
-        Object.values(currentMarkers).forEach(marker => marker.removeFrom(map));
-        markersRef.current = newMarkers;
+        displayedMarkerIds.forEach(id => {
+            markersRef.current[id].removeFrom(map);
+            delete markersRef.current[id];
+        });
 
-    }, [permits, onMarkerClick]);
-
-    // Effect to handle selecting a permit
-    React.useEffect(() => {
-        const map = mapInstanceRef.current;
-        if (!map) return;
-
-        if (selectedPermit && markersRef.current[selectedPermit.id]) {
-            const marker = markersRef.current[selectedPermit.id];
-            map.flyTo(marker.getLatLng(), 16, {
-                animate: true,
-                duration: 0.5
-            });
-            // A small delay helps ensure the flyTo is complete before opening popup
-            setTimeout(() => {
-                if (map.hasLayer(marker)) {
-                    marker.openPopup();
-                }
-            }, 500);
+        // Handle map centering and popup opening
+        const newSelectedId = selectedPermit?.id;
+        if (newSelectedId && newSelectedId !== prevSelectedIdRef.current) {
+            const marker = markersRef.current[newSelectedId];
+            if (marker) {
+                map.flyTo(marker.getLatLng(), 16, { animate: true, duration: 0.5 });
+                const timer = setTimeout(() => marker.openPopup(), 500);
+                // No cleanup function here as it could clear timers for rapid selections.
+            }
         }
-    }, [selectedPermit]);
+        prevSelectedIdRef.current = newSelectedId ?? null;
+
+    }, [permits, selectedPermit, onMarkerClick]);
 
 
     return (
