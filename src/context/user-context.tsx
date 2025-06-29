@@ -3,10 +3,14 @@
 import * as React from 'react';
 import { useRouter } from 'next/navigation';
 import { fetchEmployeeDetails, type Employee } from '@/lib/employee-data';
+import { fetchVisitorDetails, type Visitor } from '@/lib/visitor-data';
+
+type AuthenticatedUser = Employee | Visitor;
 
 interface UserContextType {
-  user: Employee | null;
+  user: AuthenticatedUser | null;
   login: (employeeCode: string, dob: string) => Promise<boolean>;
+  loginVisitor: (visitorId: string, dob: string) => Promise<boolean>;
   logout: () => void;
   isLoading: boolean;
 }
@@ -14,12 +18,11 @@ interface UserContextType {
 const UserContext = React.createContext<UserContextType | undefined>(undefined);
 
 export function UserProvider({ children }: { children: React.ReactNode }) {
-  const [user, setUser] = React.useState<Employee | null>(null);
-  const [isLoading, setIsLoading] = React.useState(true); // Start with loading true
+  const [user, setUser] = React.useState<AuthenticatedUser | null>(null);
+  const [isLoading, setIsLoading] = React.useState(true);
   const router = useRouter();
 
   React.useEffect(() => {
-    // Check local storage for saved user on initial load
     try {
       const savedUser = localStorage.getItem('user');
       if (savedUser) {
@@ -45,6 +48,19 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
     return false;
   };
 
+  const loginVisitor = async (visitorId: string, dob: string): Promise<boolean> => {
+    setIsLoading(true);
+    const visitor = await fetchVisitorDetails(visitorId, dob);
+    if (visitor) {
+      setUser(visitor);
+      localStorage.setItem('user', JSON.stringify(visitor));
+      setIsLoading(false);
+      return true;
+    }
+    setIsLoading(false);
+    return false;
+  };
+
   const logout = () => {
     setUser(null);
     localStorage.removeItem('user');
@@ -52,7 +68,7 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
   };
 
   return (
-    <UserContext.Provider value={{ user, login, logout, isLoading }}>
+    <UserContext.Provider value={{ user, login, loginVisitor, logout, isLoading }}>
       {children}
     </UserContext.Provider>
   );

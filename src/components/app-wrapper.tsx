@@ -13,20 +13,29 @@ export function AppWrapper({ children }: { children: React.ReactNode }) {
   const { user, isLoading } = useUser();
 
   useEffect(() => {
-    if (isLoading) {
-      return; // Wait until user state is loaded from localStorage
-    }
+    if (isLoading) return;
 
-    const isAuthPage = pathname === '/login';
+    const isAuthPage = pathname.startsWith('/login');
+    const isVisitorPage = pathname.startsWith('/visitor');
 
-    if (user && isAuthPage) {
-      router.push('/'); // If logged in, redirect from login page to home
-    } else if (!user && !isAuthPage) {
-      router.push('/login'); // If not logged in, redirect from any other page to login
+    if (user) {
+      if (user.type === 'employee') {
+        if (isAuthPage) router.push('/');
+        if (isVisitorPage) router.push('/'); // Employees shouldn't be on visitor pages
+      } else if (user.type === 'visitor') {
+        if (isAuthPage) router.push('/visitor');
+        if (!isVisitorPage && pathname !== '/') router.push('/visitor'); // Visitors should only be on their page or root
+        if(pathname === '/') router.push('/visitor');
+      }
+    } else {
+      // Not logged in
+      if (!isAuthPage) {
+        router.push('/login');
+      }
     }
   }, [user, isLoading, pathname, router]);
 
-  const noLayoutPages = ['/login'];
+  const noLayoutPages = ['/login', '/login/visitor'];
 
   if (noLayoutPages.includes(pathname)) {
     return <>{children}</>;
@@ -59,6 +68,14 @@ export function AppWrapper({ children }: { children: React.ReactNode }) {
     );
   }
 
+  // Visitors get a different layout (no header/footer)
+  if (user.type === 'visitor') {
+    return (
+       <div className="relative flex flex-col min-h-screen bg-gray-50">
+         <main className="flex-grow">{children}</main>
+       </div>
+    )
+  }
 
   return (
     <div className="relative flex flex-col min-h-screen bg-background">

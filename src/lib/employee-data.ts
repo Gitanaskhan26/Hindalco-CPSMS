@@ -4,9 +4,10 @@ export interface Employee {
   name: string;
   avatarUrl: string;
   avatarHint: string;
+  type: 'employee';
 }
 
-export const mockEmployees: Employee[] = [
+export const mockEmployees: Omit<Employee, 'type'>[] = [
   {
     id: '12345',
     dob: '1990-01-15',
@@ -32,7 +33,7 @@ export const fetchEmployeeDetails = async (employeeCode: string, dob: string): P
   await new Promise(resolve => setTimeout(resolve, 500));
   
   if (employee) {
-    return employee;
+    return { ...employee, type: 'employee' };
   }
   
   return null;
