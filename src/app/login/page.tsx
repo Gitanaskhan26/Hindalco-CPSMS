@@ -1,7 +1,6 @@
 'use client';
 
 import { useRouter } from 'next/navigation';
-import Image from 'next/image';
 import { Button } from '@/components/ui/button';
 import {
   Card,
@@ -14,6 +13,7 @@ import {
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { ShieldCheck } from 'lucide-react';
+import { Logo } from '@/components/icons';
 
 export default function LoginPage() {
   const router = useRouter();
@@ -33,7 +33,7 @@ export default function LoginPage() {
           data-ai-hint="industrial safety background"
         />
         <div className="relative z-10 text-center">
-            <Image src="https://storage.googleapis.com/project-spark-3c32e.appspot.com/a/studio-images/w7Yx3tZqRf/file.png" alt="Hindalco Logo" width={80} height={80} className="mx-auto mb-6" />
+            <Logo width={80} height={80} className="mx-auto mb-6" />
             <h1 className="text-4xl font-bold">
               Centralized Permit & Safety Management System
             </h1>
@@ -69,7 +69,7 @@ export default function LoginPage() {
         <Card className="w-full max-w-sm border-0 shadow-none sm:border sm:shadow-sm">
           <CardHeader className="text-center">
             <div className="mb-4 flex justify-center lg:hidden">
-                <Image src="https://storage.googleapis.com/project-spark-3c32e.appspot.com/a/studio-images/w7Yx3tZqRf/file.png" alt="Hindalco Logo" width={48} height={48} />
+                <Logo width={48} height={48} />
             </div>
             <CardTitle className="text-2xl">Welcome Back</CardTitle>
             <CardDescription>
