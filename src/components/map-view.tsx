@@ -42,7 +42,7 @@ interface MapViewProps {
   onMarkerClick: (permit: Permit | null) => void;
 }
 
-export function MapView({ permits, selectedPermit, onMarkerClick }: MapViewProps) {
+function MapViewComponent({ permits, selectedPermit, onMarkerClick }: MapViewProps) {
     const defaultPosition: L.LatLngExpression = [22.5726, 88.3639];
     const markerRefs = React.useRef<Record<string, L.Marker>>({});
 
@@ -105,3 +105,6 @@ export function MapView({ permits, selectedPermit, onMarkerClick }: MapViewProps
         </MapContainer>
     );
 }
+MapViewComponent.displayName = 'MapViewComponent';
+
+export const MapView = React.memo(MapViewComponent);

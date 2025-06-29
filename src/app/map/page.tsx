@@ -48,6 +48,10 @@ export default function MapPage() {
     setSelectedPermit(permit);
   }, []);
 
+  const handleCloseQrDialog = React.useCallback(() => {
+    setQrPermit(null);
+  }, []);
+
   return (
     <>
       <div className="h-[calc(100vh-160px)] md:h-[calc(100vh-6.5rem)] grid md:grid-cols-[380px_1fr] lg:grid-cols-[420px_1fr]">
@@ -89,7 +93,7 @@ export default function MapPage() {
         onOpenChange={setIsFormOpen}
         onPermitCreated={handlePermitCreated}
       />
-      <QRDialog permit={qrPermit} onOpenChange={() => setQrPermit(null)} />
+      <QRDialog permit={qrPermit} onOpenChange={handleCloseQrDialog} />
     </>
   );
 }
