@@ -65,6 +65,11 @@ interface MapViewProps {
   onMarkerClick: (permit: Permit | null) => void;
 }
 
+const MAP_IMAGE_URL = 'https://placehold.co/1200x900.png';
+const MAP_IMAGE_WIDTH = 1200;
+const MAP_IMAGE_HEIGHT = 900;
+
+
 export default function MapView({ permits, selectedPermit, onMarkerClick }: MapViewProps) {
     const mapContainerRef = React.useRef<HTMLDivElement>(null);
     const mapInstanceRef = React.useRef<L.Map | null>(null);
@@ -74,14 +79,20 @@ export default function MapView({ permits, selectedPermit, onMarkerClick }: MapV
     React.useEffect(() => {
         if (mapContainerRef.current && !mapInstanceRef.current) {
             const map = L.map(mapContainerRef.current, {
-                center: [22.5726, 88.3639],
-                zoom: 13,
-                scrollWheelZoom: true,
+                crs: L.CRS.Simple,
+                minZoom: -2,
             });
 
-            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
-            }).addTo(map);
+            const bounds: L.LatLngBoundsExpression = [[0, 0], [MAP_IMAGE_HEIGHT, MAP_IMAGE_WIDTH]];
+            const image = L.imageOverlay(MAP_IMAGE_URL, bounds).addTo(map);
+            
+            // Add a hint for AI to replace the placeholder
+            const imageElement = image.getElement();
+            if (imageElement) {
+              imageElement.setAttribute('data-ai-hint', 'industrial plant map');
+            }
+
+            map.fitBounds(bounds);
 
             mapInstanceRef.current = map;
         }
@@ -105,12 +116,15 @@ export default function MapView({ permits, selectedPermit, onMarkerClick }: MapV
 
         permits.forEach(permit => {
             let marker;
+            const position: L.LatLngTuple = [permit.lat, permit.lng];
+
             if (currentMarkers[permit.id]) {
                 marker = currentMarkers[permit.id];
+                marker.setLatLng(position);
                 delete currentMarkers[permit.id];
             } else {
                 const icon = createCustomIcon(permit.riskLevel);
-                marker = L.marker([permit.lat, permit.lng], { icon })
+                marker = L.marker(position, { icon })
                     .addTo(map)
                     .on('click', () => onMarkerClick(permit));
             }
@@ -131,7 +145,7 @@ export default function MapView({ permits, selectedPermit, onMarkerClick }: MapV
 
         if (selectedPermit && markersRef.current[selectedPermit.id]) {
             const marker = markersRef.current[selectedPermit.id];
-            map.flyTo(marker.getLatLng(), 15, {
+            map.flyTo(marker.getLatLng(), 1, {
                 animate: true,
                 duration: 0.5
             });

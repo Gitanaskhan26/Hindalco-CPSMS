@@ -18,6 +18,9 @@ type FormState = {
   permit?: Permit;
 };
 
+const MAP_IMAGE_WIDTH = 1200;
+const MAP_IMAGE_HEIGHT = 900;
+
 export async function createPermit(
   prevState: FormState,
   formData: FormData
@@ -52,9 +55,9 @@ export async function createPermit(
       ppeChecklist,
       ...assessment,
       status: 'Approved',
-      // Mock location for demo purposes. In a real app, this would come from the user.
-      lat: 22.5726 + (Math.random() - 0.5) * 0.1,
-      lng: 88.3639 + (Math.random() - 0.5) * 0.1,
+      // Coordinates are now based on image pixels (Y, X)
+      lat: Math.random() * MAP_IMAGE_HEIGHT, // Y-coordinate
+      lng: Math.random() * MAP_IMAGE_WIDTH,  // X-coordinate
       qrCodeUrl,
     };
 
