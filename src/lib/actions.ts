@@ -7,6 +7,8 @@ import type { Permit } from './types';
 const permitSchema = z.object({
   description: z.string().min(10, 'Description must be at least 10 characters.'),
   ppeChecklist: z.string().min(5, 'PPE checklist must be at least 5 characters.'),
+  lat: z.coerce.number(),
+  lng: z.coerce.number(),
 });
 
 type FormState = {
@@ -14,6 +16,8 @@ type FormState = {
   errors?: {
     description?: string[];
     ppeChecklist?: string[];
+    lat?: string[];
+    lng?: string[];
   };
   permit?: Permit;
 };
@@ -25,17 +29,19 @@ export async function createPermit(
   const validatedFields = permitSchema.safeParse({
     description: formData.get('description'),
     ppeChecklist: formData.get('ppeChecklist'),
+    lat: formData.get('lat'),
+    lng: formData.get('lng'),
   });
 
   if (!validatedFields.success) {
     return {
-      message: 'Please check your input.',
+      message: 'Please check your input. Location is required.',
       errors: validatedFields.error.flatten().fieldErrors,
     };
   }
 
   try {
-    const { description, ppeChecklist } = validatedFields.data;
+    const { description, ppeChecklist, lat, lng } = validatedFields.data;
     const assessment = await assessPermitRisk({ description, ppeChecklist });
 
     const id = crypto.randomUUID();
@@ -46,18 +52,14 @@ export async function createPermit(
       permitData
     )}`;
     
-    const plantLat = 24.2045;
-    const plantLng = 83.0396;
-
     const newPermit: Permit = {
       id,
       description,
       ppeChecklist,
       ...assessment,
       status: 'Approved',
-      // Coordinates around the Hindalco Renukoot plant
-      lat: plantLat + (Math.random() - 0.5) * 0.02,
-      lng: plantLng + (Math.random() - 0.5) * 0.02,
+      lat,
+      lng,
       qrCodeUrl,
     };
 

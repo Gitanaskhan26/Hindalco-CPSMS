@@ -5,7 +5,7 @@ import { useFormStatus } from 'react-dom';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
-import { Loader2 } from 'lucide-react';
+import { Loader2, CheckCircle, AlertCircle } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { createPermit } from '@/lib/actions';
 import type { Permit } from '@/lib/types';
@@ -25,6 +25,7 @@ import {
   FormLabel,
   FormMessage,
 } from '@/components/ui/form';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -44,10 +45,10 @@ const formSchema = z.object({
   }),
 });
 
-function SubmitButton() {
+function SubmitButton({ disabled }: { disabled?: boolean }) {
   const { pending } = useFormStatus();
   return (
-    <Button type="submit" disabled={pending}>
+    <Button type="submit" disabled={pending || disabled}>
       {pending ? (
         <>
           <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -67,6 +68,8 @@ export function PermitForm({
 }: PermitFormProps) {
   const { toast } = useToast();
   const [state, formAction] = React.useActionState(createPermit, { message: '' });
+  const [location, setLocation] = React.useState<{ lat: number; lng: number } | null>(null);
+  const [locationError, setLocationError] = React.useState<string | null>(null);
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -74,9 +77,43 @@ export function PermitForm({
       description: '',
       ppeChecklist: '',
     },
-    // Sync with useActionState
     errors: state?.errors,
   });
+
+  React.useEffect(() => {
+    if (isOpen) {
+      setLocation(null);
+      setLocationError(null);
+      if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(
+          (position) => {
+            setLocation({
+              lat: position.coords.latitude,
+              lng: position.coords.longitude,
+            });
+          },
+          (error) => {
+            console.error("Error getting location", error);
+            const message = "Could not get location. Please enable location services and refresh.";
+            setLocationError(message);
+            toast({
+                variant: 'destructive',
+                title: 'Location Required',
+                description: message,
+            });
+          }
+        );
+      } else {
+        const message = "Geolocation is not supported by this browser.";
+        setLocationError(message);
+        toast({
+            variant: 'destructive',
+            title: 'Location Error',
+            description: message,
+        });
+      }
+    }
+  }, [isOpen, toast]);
 
   React.useEffect(() => {
     if (state.message) {
@@ -110,11 +147,18 @@ export function PermitForm({
         <DialogHeader>
           <DialogTitle>Create New Permit</DialogTitle>
           <DialogDescription>
-            Fill in the details below. Our AI will assess the risk level.
+            Fill in the details below. Your current location will be tagged for mapping.
           </DialogDescription>
         </DialogHeader>
         <Form {...form}>
           <form action={formAction} className="space-y-4">
+             {location && (
+              <>
+                <input type="hidden" name="lat" value={location.lat} />
+                <input type="hidden" name="lng" value={location.lng} />
+              </>
+            )}
+
             <FormField
               control={form.control}
               name="description"
@@ -141,9 +185,39 @@ export function PermitForm({
                 </FormItem>
               )}
             />
+
+            <div className="space-y-2">
+              <FormLabel>Location Status</FormLabel>
+               {locationError && (
+                <Alert variant="destructive">
+                  <AlertCircle className="h-4 w-4" />
+                  <AlertTitle>Error</AlertTitle>
+                  <AlertDescription>{locationError}</AlertDescription>
+                </Alert>
+              )}
+              {!location && !locationError && (
+                <Alert>
+                   <Loader2 className="h-4 w-4 animate-spin" />
+                   <AlertTitle>Please Wait</AlertTitle>
+                  <AlertDescription>
+                    Fetching your current location...
+                  </AlertDescription>
+                </Alert>
+              )}
+              {location && (
+                <Alert className="border-green-500/50 text-green-700 [&>svg]:text-green-700">
+                  <CheckCircle className="h-4 w-4" />
+                  <AlertTitle>Success</AlertTitle>
+                  <AlertDescription>
+                    Location captured successfully.
+                  </AlertDescription>
+                </Alert>
+              )}
+            </div>
+
             <DialogFooter>
               <Button variant="ghost" onClick={() => onOpenChange(false)} type="button">Cancel</Button>
-              <SubmitButton />
+              <SubmitButton disabled={!location} />
             </DialogFooter>
           </form>
         </Form>
