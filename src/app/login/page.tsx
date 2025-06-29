@@ -33,7 +33,7 @@ export default function LoginPage() {
           data-ai-hint="industrial safety background"
         />
         <div className="relative z-10 text-center">
-            <Logo width={200} height={22} className="mx-auto mb-6" />
+            <Logo width={64} height={64} className="mx-auto mb-6" />
             <h1 className="text-4xl font-bold">
               Centralized Permit & Safety Management System
             </h1>
@@ -69,7 +69,7 @@ export default function LoginPage() {
         <Card className="w-full max-w-sm border-0 shadow-none sm:border sm:shadow-sm">
           <CardHeader className="text-center">
             <div className="mb-4 flex justify-center lg:hidden">
-                <Logo width={150} height={16} />
+                <Logo width={64} height={64} />
             </div>
             <CardTitle className="text-2xl">Welcome Back</CardTitle>
             <CardDescription>

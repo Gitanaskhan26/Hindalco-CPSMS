@@ -7,18 +7,14 @@ interface LogoProps {
   className?: string;
 }
 
-export const Logo = ({ width, height, className }: LogoProps) => {
+export const Logo = ({ width = 64, height = 64, className }: LogoProps) => {
   return (
     <img
-      src={`https://placehold.co/${width || 120}x${height || 13}.png`}
+      src={`https://placehold.co/${width}x${height}`}
       alt="Logo Placeholder"
-      width={typeof width === 'string' ? undefined : width}
-      height={typeof height === 'string' ? undefined : height}
+      width={typeof width === 'string' ? undefined : Number(width)}
+      height={typeof height === 'string' ? undefined : Number(height)}
       className={cn('bg-muted text-muted-foreground', className)}
-      style={{
-        width: width ? (typeof width === 'string' ? width : `${width}px`) : 'auto',
-        height: height ? (typeof height === 'string' ? height : `${height}px`) : 'auto',
-      }}
       data-ai-hint="logo"
     />
   );

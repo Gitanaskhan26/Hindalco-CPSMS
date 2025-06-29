@@ -65,8 +65,9 @@ export const HindalcoHeader = () => {
               </SheetTrigger>
               <SheetContent side="left">
                 <div className="flex flex-col space-y-4 p-4">
-                  <Link href="/" className="flex items-center cursor-pointer mb-4">
-                    <Logo width={120} height={13} />
+                  <Link href="/" className="flex items-center cursor-pointer mb-4 gap-3">
+                    <Logo width={40} height={40} />
+                    <span className="text-xl font-bold">C-PSMS</span>
                   </Link>
                   <nav className="flex flex-col space-y-2">
                     {navItems.map((item) => (
@@ -86,8 +87,9 @@ export const HindalcoHeader = () => {
             </Sheet>
           </div>
 
-          <Link href="/" className="flex items-center cursor-pointer">
-            <Logo width={120} height={13} />
+          <Link href="/" className="flex items-center cursor-pointer gap-3">
+            <Logo width={40} height={40} />
+            <span className="text-xl font-semibold hidden md:inline">C-PSMS</span>
           </Link>
         </div>
 
