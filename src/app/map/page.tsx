@@ -13,7 +13,9 @@ import { Skeleton } from '@/components/ui/skeleton';
 
 import type { Permit } from '@/lib/types';
 import { initialPermits } from '@/lib/data';
+import { MapLayers } from '@/components/map-view';
 
+// Dynamically import ONLY the MapView container component
 const MapView = dynamic(
   () => import('@/components/map-view').then(mod => mod.MapView),
   {
@@ -80,11 +82,13 @@ export default function MapPage() {
 
         {/* Map View */}
         <main className="h-full w-full">
-          <MapView
-            permits={permits}
-            selectedPermit={selectedPermit}
-            onMarkerClick={handleMarkerClick}
-          />
+          <MapView>
+            <MapLayers
+              permits={permits}
+              selectedPermit={selectedPermit}
+              onMarkerClick={handleMarkerClick}
+            />
+          </MapView>
         </main>
       </div>
 

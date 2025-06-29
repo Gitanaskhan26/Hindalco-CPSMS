@@ -8,13 +8,14 @@ import type { Permit, RiskLevel } from '@/lib/types';
 import { Badge } from './ui/badge';
 import { CardHeader, CardContent, CardTitle } from './ui/card';
 
+// --- Helper Functions and Constants ---
+
 const riskColorMap: Record<RiskLevel, string> = {
   high: '#EF4444', // red-500
   medium: '#F97316', // orange-500
   low: '#22C55E', // green-500
 };
 
-// Custom icon logic
 const createCustomIcon = (riskLevel: RiskLevel) => {
   return L.divIcon({
     html: `<span style="background-color: ${riskColorMap[riskLevel]}; width: 1.5rem; height: 1.5rem; display: block; border-radius: 50%; border: 2px solid white; box-shadow: 0 0 5px rgba(0,0,0,0.5);"></span>`,
@@ -25,13 +26,21 @@ const createCustomIcon = (riskLevel: RiskLevel) => {
   });
 };
 
+// --- Map Layers Component ---
+// This component contains all the dynamic parts of the map (markers, popups, effects)
+// It assumes it will be rendered inside a MapContainer.
+
 interface MapLayersProps {
   permits: Permit[];
   selectedPermit: Permit | null;
   onMarkerClick: (permit: Permit | null) => void;
 }
 
-function MapLayers({ permits, selectedPermit, onMarkerClick }: MapLayersProps) {
+export function MapLayers({
+  permits,
+  selectedPermit,
+  onMarkerClick,
+}: MapLayersProps) {
   const map = useMap();
   const markerRefs = React.useRef<Record<string, L.Marker>>({});
 
@@ -62,9 +71,7 @@ function MapLayers({ permits, selectedPermit, onMarkerClick }: MapLayersProps) {
             position={[permit.lat, permit.lng]}
             icon={markerIcon}
             eventHandlers={{
-              click: () => {
-                onMarkerClick(permit);
-              },
+              click: () => onMarkerClick(permit),
             }}
           >
             <Popup onClose={() => onMarkerClick(null)}>
@@ -100,17 +107,15 @@ function MapLayers({ permits, selectedPermit, onMarkerClick }: MapLayersProps) {
   );
 }
 
+// --- Map View Component (The Stable Container) ---
+// This component only sets up the map and renders children. It takes no changing props.
+// It will be dynamically imported on the page.
+
 interface MapViewProps {
-  permits: Permit[];
-  selectedPermit: Permit | null;
-  onMarkerClick: (permit: Permit | null) => void;
+  children: React.ReactNode;
 }
 
-export function MapView({
-  permits,
-  selectedPermit,
-  onMarkerClick,
-}: MapViewProps) {
+export function MapView({ children }: MapViewProps) {
   const defaultPosition: L.LatLngExpression = [22.5726, 88.3639];
 
   return (
@@ -124,11 +129,7 @@ export function MapView({
         attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
         url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
       />
-      <MapLayers
-        permits={permits}
-        selectedPermit={selectedPermit}
-        onMarkerClick={onMarkerClick}
-      />
+      {children}
     </MapContainer>
   );
 }
