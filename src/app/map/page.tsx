@@ -36,17 +36,17 @@ export default function MapPage() {
     setIsFormOpen(false);
   }, []);
 
-  const handleSelectPermit = (permit: Permit) => {
+  const handleSelectPermit = React.useCallback((permit: Permit) => {
     setSelectedPermit(permit);
-  };
+  }, []);
 
-  const handleViewQr = (permit: Permit) => {
+  const handleViewQr = React.useCallback((permit: Permit) => {
     setQrPermit(permit);
-  };
+  }, []);
 
-  const handleMarkerClick = (permit: Permit | null) => {
+  const handleMarkerClick = React.useCallback((permit: Permit | null) => {
     setSelectedPermit(permit);
-  };
+  }, []);
 
   return (
     <>
@@ -66,8 +66,8 @@ export default function MapPage() {
                   key={permit.id}
                   permit={permit}
                   isSelected={selectedPermit?.id === permit.id}
-                  onSelect={() => handleSelectPermit(permit)}
-                  onViewQr={() => handleViewQr(permit)}
+                  onSelect={handleSelectPermit}
+                  onViewQr={handleViewQr}
                 />
               ))}
             </div>

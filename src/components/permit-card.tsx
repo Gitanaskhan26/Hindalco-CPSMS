@@ -16,8 +16,8 @@ import { Button } from '@/components/ui/button';
 interface PermitCardProps {
   permit: Permit;
   isSelected: boolean;
-  onSelect: () => void;
-  onViewQr: () => void;
+  onSelect: (permit: Permit) => void;
+  onViewQr: (permit: Permit) => void;
 }
 
 const riskVariantMap = {
@@ -33,6 +33,9 @@ const riskClassMap = {
 }
 
 export function PermitCard({ permit, isSelected, onSelect, onViewQr }: PermitCardProps) {
+  const handleSelect = () => onSelect(permit);
+  const handleViewQr = () => onViewQr(permit);
+
   return (
     <Card
       className={cn(
@@ -40,7 +43,7 @@ export function PermitCard({ permit, isSelected, onSelect, onViewQr }: PermitCar
         isSelected && 'ring-2 ring-primary'
       )}
     >
-      <CardHeader className="p-4" onClick={onSelect}>
+      <CardHeader className="p-4" onClick={handleSelect}>
         <div className="flex items-center justify-between">
             <CardTitle className="text-base">Permit #{permit.id.slice(0, 4)}...</CardTitle>
             <Badge className={cn('capitalize', riskClassMap[permit.riskLevel])}>
@@ -52,11 +55,11 @@ export function PermitCard({ permit, isSelected, onSelect, onViewQr }: PermitCar
         </CardDescription>
       </CardHeader>
       <CardFooter className="flex justify-end gap-2 p-4 pt-0">
-        <Button variant="ghost" size="sm" onClick={onSelect}>
+        <Button variant="ghost" size="sm" onClick={handleSelect}>
           <MapPin className="mr-2 h-4 w-4" />
           View on Map
         </Button>
-        <Button variant="outline" size="sm" onClick={onViewQr}>
+        <Button variant="outline" size="sm" onClick={handleViewQr}>
           <QrCode className="mr-2 h-4 w-4" />
           Validate
         </Button>
