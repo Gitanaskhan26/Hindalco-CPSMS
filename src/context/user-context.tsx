@@ -90,8 +90,6 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
       setIsLoading(false);
       return true;
     } catch (error) {
-      console.error("Could not get visitor location.", error);
-      
       let title = 'Location Error';
       let description = 'Could not get your location. The QR code cannot be generated without it.';
 
