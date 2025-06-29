@@ -21,7 +21,9 @@ export type AssessPermitRiskInput = z.infer<typeof AssessPermitRiskInputSchema>;
 
 const AssessPermitRiskOutputSchema = z.object({
   riskLevel: z
-    .enum(['low', 'medium', 'high'])
+    .string()
+    .transform((val) => val.toLowerCase())
+    .pipe(z.enum(['low', 'medium', 'high']))
     .describe('The risk level of the permit.'),
   justification: z
     .string()
@@ -53,6 +55,9 @@ const assessPermitRiskFlow = ai.defineFlow(
   },
   async input => {
     const {output} = await prompt(input);
-    return output!;
+    if (!output) {
+      throw new Error('The AI failed to generate a valid risk assessment.');
+    }
+    return output;
   }
 );
