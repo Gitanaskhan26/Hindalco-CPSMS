@@ -3,8 +3,8 @@
 import 'leaflet/dist/leaflet.css';
 import * as React from 'react';
 import L from 'leaflet';
-import type { Permit, RiskLevel } from '@/lib/types';
 import { renderToStaticMarkup } from 'react-dom/server';
+import type { Permit, RiskLevel } from '@/lib/types';
 import { Badge } from './ui/badge';
 import { CardHeader, CardContent, CardTitle } from './ui/card';
 
@@ -65,10 +65,7 @@ interface MapViewProps {
   onMarkerClick: (permit: Permit | null) => void;
 }
 
-const MAP_IMAGE_URL = 'https://placehold.co/1200x900.png';
-const MAP_IMAGE_WIDTH = 1200;
-const MAP_IMAGE_HEIGHT = 900;
-
+const defaultPosition: L.LatLngTuple = [22.3511148, 78.6677428]; // Center of India
 
 export default function MapView({ permits, selectedPermit, onMarkerClick }: MapViewProps) {
     const mapContainerRef = React.useRef<HTMLDivElement>(null);
@@ -78,21 +75,11 @@ export default function MapView({ permits, selectedPermit, onMarkerClick }: MapV
     // Effect to initialize the map
     React.useEffect(() => {
         if (mapContainerRef.current && !mapInstanceRef.current) {
-            const map = L.map(mapContainerRef.current, {
-                crs: L.CRS.Simple,
-                minZoom: -2,
-            });
+            const map = L.map(mapContainerRef.current).setView(defaultPosition, 5);
 
-            const bounds: L.LatLngBoundsExpression = [[0, 0], [MAP_IMAGE_HEIGHT, MAP_IMAGE_WIDTH]];
-            const image = L.imageOverlay(MAP_IMAGE_URL, bounds).addTo(map);
-            
-            // Add a hint for AI to replace the placeholder
-            const imageElement = image.getElement();
-            if (imageElement) {
-              imageElement.setAttribute('data-ai-hint', 'industrial plant map');
-            }
-
-            map.fitBounds(bounds);
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+            }).addTo(map);
 
             mapInstanceRef.current = map;
         }
@@ -145,7 +132,7 @@ export default function MapView({ permits, selectedPermit, onMarkerClick }: MapV
 
         if (selectedPermit && markersRef.current[selectedPermit.id]) {
             const marker = markersRef.current[selectedPermit.id];
-            map.flyTo(marker.getLatLng(), 1, {
+            map.flyTo(marker.getLatLng(), 13, {
                 animate: true,
                 duration: 0.5
             });

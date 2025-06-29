@@ -1,8 +1,5 @@
 import type { Permit, PermitStatus } from './types';
 
-const MAP_IMAGE_WIDTH = 1200;
-const MAP_IMAGE_HEIGHT = 900;
-
 function createPermit(id: string, riskLevel: 'low' | 'medium' | 'high', description: string, ppe: string, status: PermitStatus): Permit {
     const permitData = JSON.stringify({ id, risk: riskLevel });
     return {
@@ -12,9 +9,8 @@ function createPermit(id: string, riskLevel: 'low' | 'medium' | 'high', descript
         riskLevel,
         status,
         justification: `Assessment based on description and PPE requirements.`,
-        // Coordinates are now based on image pixels (Y, X)
-        lat: Math.random() * MAP_IMAGE_HEIGHT, // Y-coordinate
-        lng: Math.random() * MAP_IMAGE_WIDTH,  // X-coordinate
+        lat: 22.3511148 + (Math.random() - 0.5) * 10,
+        lng: 78.6677428 + (Math.random() - 0.5) * 10,
         qrCodeUrl: `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(permitData)}`,
     };
 }

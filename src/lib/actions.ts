@@ -18,9 +18,6 @@ type FormState = {
   permit?: Permit;
 };
 
-const MAP_IMAGE_WIDTH = 1200;
-const MAP_IMAGE_HEIGHT = 900;
-
 export async function createPermit(
   prevState: FormState,
   formData: FormData
@@ -55,9 +52,9 @@ export async function createPermit(
       ppeChecklist,
       ...assessment,
       status: 'Approved',
-      // Coordinates are now based on image pixels (Y, X)
-      lat: Math.random() * MAP_IMAGE_HEIGHT, // Y-coordinate
-      lng: Math.random() * MAP_IMAGE_WIDTH,  // X-coordinate
+      // Random coordinates around central India for demonstration
+      lat: 22.3511148 + (Math.random() - 0.5) * 5,
+      lng: 78.6677428 + (Math.random() - 0.5) * 5,
       qrCodeUrl,
     };
 
