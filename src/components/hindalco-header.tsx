@@ -66,7 +66,7 @@ export const HindalcoHeader = () => {
               <SheetContent side="left">
                 <div className="flex flex-col space-y-4 p-4">
                   <Link href="/" className="flex items-center cursor-pointer mb-4">
-                    <Logo width={40} height={40} />
+                    <Logo width={40} height={9} />
                     <h1 className="text-xl font-bold ml-2 text-primary">
                       C-PSMS
                     </h1>
@@ -90,7 +90,7 @@ export const HindalcoHeader = () => {
           </div>
 
           <Link href="/" className="flex items-center cursor-pointer">
-            <Logo width={40} height={40} />
+            <Logo width={40} height={9} />
             <h1 className="text-xl font-bold ml-2 hidden sm:block">C-PSMS</h1>
           </Link>
         </div>
