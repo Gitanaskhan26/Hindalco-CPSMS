@@ -6,10 +6,11 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { LogOut, Clock, CalendarOff, MapPin } from 'lucide-react';
+import { LogOut, Clock, CalendarOff, MapPin, MapPinOff } from 'lucide-react';
 import Image from 'next/image';
 import { format } from 'date-fns';
 import { Skeleton } from '@/components/ui/skeleton';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 
 export default function VisitorPage() {
     const { user, isLoading, logout } = useUser();
@@ -32,14 +33,11 @@ export default function VisitorPage() {
 
     const { id, name, avatarUrl, avatarHint, entryTime, validUntil, lat, lng } = user;
     const userInitials = name.split(' ').map(n => n[0]).join('');
+    const hasLocation = lat && lng;
 
-    const qrData = JSON.stringify({
-        id,
-        name,
-        validUntil,
-        type: 'visitor-pass'
-    });
-    const qrCodeUrl = `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(qrData)}`;
+    const qrCodeUrl = hasLocation 
+        ? `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(JSON.stringify({ id, name, validUntil, type: 'visitor-pass' }))}` 
+        : '';
 
     const isExpired = new Date(validUntil) < new Date();
 
@@ -67,17 +65,27 @@ export default function VisitorPage() {
                         </Badge>
                     </CardHeader>
                     <CardContent className="flex flex-col items-center gap-6">
-                        <div className="rounded-lg border-2 border-dashed p-2 bg-white">
-                            <Image
-                                src={qrCodeUrl}
-                                alt={`QR Code for Visitor ${name}`}
-                                width={250}
-                                height={250}
-                                className="rounded-md"
-                                data-ai-hint="qr code"
-                                priority
-                            />
-                        </div>
+                        {hasLocation ? (
+                            <div className="rounded-lg border-2 border-dashed p-2 bg-white">
+                                <Image
+                                    src={qrCodeUrl}
+                                    alt={`QR Code for Visitor ${name}`}
+                                    width={250}
+                                    height={250}
+                                    className="rounded-md"
+                                    data-ai-hint="qr code"
+                                    priority
+                                />
+                            </div>
+                        ) : (
+                            <Alert variant="destructive">
+                                <MapPinOff className="h-4 w-4" />
+                                <AlertTitle>Location Required</AlertTitle>
+                                <AlertDescription>
+                                    Your QR code cannot be generated without location access. Please enable location services in your browser settings and refresh the page.
+                                </AlertDescription>
+                            </Alert>
+                        )}
                         <div className="w-full space-y-3 text-sm">
                            <div className="flex items-center justify-between p-3 bg-muted/50 rounded-lg">
                                <div className="flex items-center gap-3 text-muted-foreground">
