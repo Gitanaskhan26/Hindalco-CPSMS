@@ -1,3 +1,4 @@
+
 'use client';
 
 import 'leaflet/dist/leaflet.css';
@@ -27,7 +28,7 @@ const createCustomIcon = (riskLevel: RiskLevel) => {
 };
 
 // --- Map Layers Component ---
-// This is now an internal component and is not exported.
+// This is an internal component and is not exported.
 interface MapLayersProps {
   permits: Permit[];
   selectedPermit: Permit | null;
@@ -115,7 +116,8 @@ interface MapViewProps {
   onMarkerClick: (permit: Permit | null) => void;
 }
 
-export function MapView({ permits, selectedPermit, onMarkerClick }: MapViewProps) {
+// Use a default export for better dynamic import compatibility.
+export default function MapView({ permits, selectedPermit, onMarkerClick }: MapViewProps) {
   const defaultPosition: L.LatLngExpression = [22.5726, 88.3639];
 
   return (

@@ -1,3 +1,4 @@
+
 'use client';
 
 import * as React from 'react';
@@ -14,14 +15,11 @@ import { Skeleton } from '@/components/ui/skeleton';
 import type { Permit } from '@/lib/types';
 import { initialPermits } from '@/lib/data';
 
-// Dynamically import the entire MapView component, which now handles its own layers.
-const MapView = dynamic(
-  () => import('@/components/map-view').then(mod => mod.MapView),
-  {
-    loading: () => <Skeleton className="h-full w-full" />,
-    ssr: false,
-  }
-);
+// Dynamically import the MapView component as the default export.
+const MapView = dynamic(() => import('@/components/map-view'), {
+  loading: () => <Skeleton className="h-full w-full" />,
+  ssr: false,
+});
 
 export default function MapPage() {
   const [permits, setPermits] = React.useState<Permit[]>(initialPermits);
