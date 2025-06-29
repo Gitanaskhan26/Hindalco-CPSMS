@@ -1,5 +1,8 @@
 import type { Permit, PermitStatus } from './types';
 
+const plantLat = 24.2045;
+const plantLng = 83.0396;
+
 function createPermit(id: string, riskLevel: 'low' | 'medium' | 'high', description: string, ppe: string, status: PermitStatus): Permit {
     const permitData = JSON.stringify({ id, risk: riskLevel });
     return {
@@ -9,8 +12,8 @@ function createPermit(id: string, riskLevel: 'low' | 'medium' | 'high', descript
         riskLevel,
         status,
         justification: `Assessment based on description and PPE requirements.`,
-        lat: 22.3511148 + (Math.random() - 0.5) * 10,
-        lng: 78.6677428 + (Math.random() - 0.5) * 10,
+        lat: plantLat + (Math.random() - 0.5) * 0.02, // Spread around the plant
+        lng: plantLng + (Math.random() - 0.5) * 0.02, // Spread around the plant
         qrCodeUrl: `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(permitData)}`,
     };
 }

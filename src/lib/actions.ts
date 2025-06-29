@@ -45,6 +45,9 @@ export async function createPermit(
     const qrCodeUrl = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(
       permitData
     )}`;
+    
+    const plantLat = 24.2045;
+    const plantLng = 83.0396;
 
     const newPermit: Permit = {
       id,
@@ -52,9 +55,9 @@ export async function createPermit(
       ppeChecklist,
       ...assessment,
       status: 'Approved',
-      // Random coordinates around central India for demonstration
-      lat: 22.3511148 + (Math.random() - 0.5) * 5,
-      lng: 78.6677428 + (Math.random() - 0.5) * 5,
+      // Coordinates around the Hindalco Renukoot plant
+      lat: plantLat + (Math.random() - 0.5) * 0.02,
+      lng: plantLng + (Math.random() - 0.5) * 0.02,
       qrCodeUrl,
     };
 

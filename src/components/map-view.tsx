@@ -65,7 +65,7 @@ interface MapViewProps {
   onMarkerClick: (permit: Permit | null) => void;
 }
 
-const defaultPosition: L.LatLngTuple = [22.3511148, 78.6677428]; // Center of India
+const defaultPosition: L.LatLngTuple = [24.2045, 83.0396]; // Hindalco Plant, Renukoot
 
 export default function MapView({ permits, selectedPermit, onMarkerClick }: MapViewProps) {
     const mapContainerRef = React.useRef<HTMLDivElement>(null);
@@ -75,7 +75,7 @@ export default function MapView({ permits, selectedPermit, onMarkerClick }: MapV
     // Effect to initialize the map
     React.useEffect(() => {
         if (mapContainerRef.current && !mapInstanceRef.current) {
-            const map = L.map(mapContainerRef.current).setView(defaultPosition, 5);
+            const map = L.map(mapContainerRef.current).setView(defaultPosition, 14);
 
             L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
                 attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
@@ -132,7 +132,7 @@ export default function MapView({ permits, selectedPermit, onMarkerClick }: MapV
 
         if (selectedPermit && markersRef.current[selectedPermit.id]) {
             const marker = markersRef.current[selectedPermit.id];
-            map.flyTo(marker.getLatLng(), 13, {
+            map.flyTo(marker.getLatLng(), 16, {
                 animate: true,
                 duration: 0.5
             });
