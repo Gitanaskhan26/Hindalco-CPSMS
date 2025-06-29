@@ -9,9 +9,11 @@ export interface Visitor {
   entryTime: string; // ISO 8601 string
   validUntil: string; // ISO 8601 string
   type: 'visitor';
+  lat?: number;
+  lng?: number;
 }
 
-export const mockVisitors: Omit<Visitor, 'type'>[] = [
+export const mockVisitors: Omit<Visitor, 'type' | 'lat' | 'lng'>[] = [
   {
     id: 'V-98765',
     dob: '1988-11-22',

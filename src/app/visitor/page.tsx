@@ -6,7 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { LogOut, Clock, CalendarOff } from 'lucide-react';
+import { LogOut, Clock, CalendarOff, MapPin } from 'lucide-react';
 import Image from 'next/image';
 import { format } from 'date-fns';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -30,7 +30,7 @@ export default function VisitorPage() {
         )
     }
 
-    const { id, name, avatarUrl, avatarHint, entryTime, validUntil } = user;
+    const { id, name, avatarUrl, avatarHint, entryTime, validUntil, lat, lng } = user;
     const userInitials = name.split(' ').map(n => n[0]).join('');
 
     const qrData = JSON.stringify({
@@ -93,6 +93,15 @@ export default function VisitorPage() {
                                </div>
                                <span className="font-mono text-foreground">{format(new Date(validUntil), 'dd MMM yyyy, h:mm a')}</span>
                            </div>
+                           {lat && lng && (
+                               <div className="flex items-center justify-between p-3 bg-muted/50 rounded-lg">
+                                   <div className="flex items-center gap-3 text-muted-foreground">
+                                       <MapPin className="h-5 w-5" />
+                                       <span className="font-semibold">Logged In Location</span>
+                                   </div>
+                                   <span className="font-mono text-foreground">{lat.toFixed(4)}, {lng.toFixed(4)}</span>
+                               </div>
+                           )}
                         </div>
                         <p className="text-xs text-muted-foreground text-center px-4">
                             This is your digital entry pass. Please present this QR code for verification.

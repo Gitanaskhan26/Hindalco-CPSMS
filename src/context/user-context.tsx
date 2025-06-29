@@ -52,8 +52,36 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
     setIsLoading(true);
     const visitor = await fetchVisitorDetails(visitorId, dob);
     if (visitor) {
-      setUser(visitor);
-      localStorage.setItem('user', JSON.stringify(visitor));
+      if (navigator.geolocation) {
+        try {
+          const position = await new Promise<GeolocationPosition>((resolve, reject) => {
+            navigator.geolocation.getCurrentPosition(resolve, reject, {
+              enableHighAccuracy: true,
+              timeout: 10000,
+              maximumAge: 0,
+            });
+          });
+
+          const locatedVisitor: Visitor = {
+            ...visitor,
+            lat: position.coords.latitude,
+            lng: position.coords.longitude,
+          };
+          setUser(locatedVisitor);
+          localStorage.setItem('user', JSON.stringify(locatedVisitor));
+        } catch (error) {
+          console.error("Could not get visitor location.", error);
+          // Fallback to login without location
+          setUser(visitor);
+          localStorage.setItem('user', JSON.stringify(visitor));
+        }
+      } else {
+        console.error("Geolocation is not supported by this browser.");
+        // Fallback to login without location
+        setUser(visitor);
+        localStorage.setItem('user', JSON.stringify(visitor));
+      }
+      
       setIsLoading(false);
       return true;
     }
