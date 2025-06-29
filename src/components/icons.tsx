@@ -1,18 +1,21 @@
 import * as React from 'react';
+import Image from 'next/image';
 
-export const Logo = (props: React.SVGProps<SVGSVGElement>) => (
-  <svg
-    width="32"
-    height="32"
-    viewBox="0 0 32 32"
-    fill="none"
-    xmlns="http://www.w3.org/2000/svg"
-    {...props}
-  >
-    <circle cx="16" cy="16" r="16" fill="hsl(var(--primary))" />
-    <path
-      d="M10 10V22H12V16H20V22H22V10H20V14H12V10H10Z"
-      fill="hsl(var(--primary-foreground))"
-    />
-  </svg>
-);
+// A wrapper is needed for next/image with fill={true}
+// It should have a position attribute like relative, absolute, fixed, or sticky.
+// The parent components already provide dimensions via className.
+export const Logo = ({
+  className,
+  ...props
+}: React.HTMLAttributes<HTMLDivElement>) => {
+  return (
+    <div className={`relative ${className || ''}`} {...props}>
+      <Image
+        src="https://storage.googleapis.com/project-spark-3c32e.appspot.com/a/studio-images/z6nLp1hIeI/logo.svg"
+        alt="Hindalco Logo"
+        fill
+        style={{objectFit: 'contain'}}
+      />
+    </div>
+  );
+};
