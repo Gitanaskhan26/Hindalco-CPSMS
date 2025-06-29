@@ -1,5 +1,6 @@
 'use client';
 
+import * as React from 'react';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import {
@@ -12,16 +13,54 @@ import {
 } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { ShieldCheck } from 'lucide-react';
+import { ShieldCheck, Loader2, Calendar as CalendarIcon } from 'lucide-react';
 import { Logo } from '@/components/icons';
+import { useUser } from '@/context/user-context';
+import { useToast } from '@/hooks/use-toast';
+import { Calendar } from "@/components/ui/calendar"
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover"
+import { format } from "date-fns"
+import { cn } from "@/lib/utils"
 
 export default function LoginPage() {
   const router = useRouter();
+  const { login } = useUser();
+  const { toast } = useToast();
+  const [employeeCode, setEmployeeCode] = React.useState('12345');
+  const [dob, setDob] = React.useState<Date | undefined>(new Date('1990-01-15'));
+  const [isLoading, setIsLoading] = React.useState(false);
 
-  const handleLogin = (e: React.FormEvent) => {
+
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    // In a real app, you would perform authentication here
-    router.push('/');
+    if (!employeeCode || !dob) {
+      toast({
+          variant: 'destructive',
+          title: 'Missing Information',
+          description: 'Please enter your Employee Code and Date of Birth.',
+      });
+      return;
+    }
+    setIsLoading(true);
+
+    const dobString = format(dob, 'yyyy-MM-dd');
+    const success = await login(employeeCode, dobString);
+
+    setIsLoading(false);
+
+    if (success) {
+      router.push('/');
+    } else {
+      toast({
+          variant: 'destructive',
+          title: 'Login Failed',
+          description: 'Invalid Employee Code or Date of Birth. Please try again.',
+      });
+    }
   };
 
   return (
@@ -79,25 +118,46 @@ export default function LoginPage() {
           <CardContent>
             <form onSubmit={handleLogin} className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="email">Email</Label>
+                <Label htmlFor="employee-code">Employee Code</Label>
                 <Input
-                  id="email"
-                  type="email"
-                  placeholder="m@example.com"
-                  defaultValue="user@hindalco.com"
+                  id="employee-code"
+                  type="text"
+                  placeholder="e.g., 12345"
+                  value={employeeCode}
+                  onChange={(e) => setEmployeeCode(e.target.value)}
                   required
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="password">Password</Label>
-                <Input
-                  id="password"
-                  type="password"
-                  defaultValue="password"
-                  required
-                />
+                <Label htmlFor="dob">Date of Birth</Label>
+                 <Popover>
+                  <PopoverTrigger asChild>
+                    <Button
+                      variant={"outline"}
+                      className={cn(
+                        "w-full justify-start text-left font-normal",
+                        !dob && "text-muted-foreground"
+                      )}
+                    >
+                      <CalendarIcon className="mr-2 h-4 w-4" />
+                      {dob ? format(dob, "PPP") : <span>Pick a date</span>}
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-0">
+                    <Calendar
+                      mode="single"
+                      selected={dob}
+                      onSelect={setDob}
+                      initialFocus
+                      disabled={(date) =>
+                        date > new Date() || date < new Date("1930-01-01")
+                      }
+                    />
+                  </PopoverContent>
+                </Popover>
               </div>
-              <Button type="submit" className="w-full">
+              <Button type="submit" className="w-full" disabled={isLoading}>
+                {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                 Sign In
               </Button>
             </form>
