@@ -17,7 +17,6 @@ import {
   LayoutDashboard,
   ShieldCheck,
 } from 'lucide-react';
-import { Logo } from '@/components/icons';
 
 export const HindalcoHeader = () => {
   const router = useRouter();
@@ -66,7 +65,7 @@ export const HindalcoHeader = () => {
               <SheetContent side="left">
                 <div className="flex flex-col space-y-4 p-4">
                   <Link href="/" className="flex items-center cursor-pointer mb-4">
-                    <Logo className="h-10 w-10" />
+                    <img src="https://storage.googleapis.com/project-spark-3c32e.appspot.com/a/studio-images/w7Yx3tZqRf/file.png" alt="Hindalco Logo" className="h-10 w-10" />
                     <h1 className="text-xl font-bold ml-2 text-primary">
                       C-PSMS
                     </h1>
@@ -90,7 +89,7 @@ export const HindalcoHeader = () => {
           </div>
 
           <Link href="/" className="flex items-center cursor-pointer">
-            <Logo className="h-10 w-10" />
+            <img src="https://storage.googleapis.com/project-spark-3c32e.appspot.com/a/studio-images/w7Yx3tZqRf/file.png" alt="Hindalco Logo" className="h-10 w-10" />
             <h1 className="text-xl font-bold ml-2 hidden sm:block">C-PSMS</h1>
           </Link>
         </div>

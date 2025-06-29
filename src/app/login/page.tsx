@@ -12,7 +12,6 @@ import {
 } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Logo } from '@/components/icons';
 import { ShieldCheck } from 'lucide-react';
 
 export default function LoginPage() {
@@ -33,7 +32,7 @@ export default function LoginPage() {
           data-ai-hint="industrial safety background"
         />
         <div className="relative z-10 text-center">
-            <Logo className="h-20 w-20 mx-auto mb-6" />
+            <img src="https://storage.googleapis.com/project-spark-3c32e.appspot.com/a/studio-images/w7Yx3tZqRf/file.png" alt="Hindalco Logo" className="h-20 w-20 mx-auto mb-6" />
             <h1 className="text-4xl font-bold">
               Centralized Permit & Safety Management System
             </h1>
@@ -69,7 +68,7 @@ export default function LoginPage() {
         <Card className="w-full max-w-sm border-0 shadow-none sm:border sm:shadow-sm">
           <CardHeader className="text-center">
             <div className="mb-4 flex justify-center lg:hidden">
-                <Logo className="h-12 w-12" />
+                <img src="https://storage.googleapis.com/project-spark-3c32e.appspot.com/a/studio-images/w7Yx3tZqRf/file.png" alt="Hindalco Logo" className="h-12 w-12" />
             </div>
             <CardTitle className="text-2xl">Welcome Back</CardTitle>
             <CardDescription>
@@ -94,6 +93,7 @@ export default function LoginPage() {
                   id="password"
                   type="password"
                   defaultValue="password"
+                  type="password"
                   required
                 />
               </div>
