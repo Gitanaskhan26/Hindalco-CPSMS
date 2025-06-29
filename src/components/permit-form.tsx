@@ -45,6 +45,8 @@ const formSchema = z.object({
   }),
 });
 
+type FormValues = z.infer<typeof formSchema>;
+
 function SubmitButton({ disabled }: { disabled?: boolean }) {
   const { pending } = useFormStatus();
   return (
@@ -71,13 +73,12 @@ export function PermitForm({
   const [location, setLocation] = React.useState<{ lat: number; lng: number } | null>(null);
   const [locationError, setLocationError] = React.useState<string | null>(null);
 
-  const form = useForm<z.infer<typeof formSchema>>({
+  const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       description: '',
       ppeChecklist: '',
     },
-    errors: state?.errors,
   });
 
   React.useEffect(() => {
@@ -116,23 +117,34 @@ export function PermitForm({
   }, [isOpen, toast]);
 
   React.useEffect(() => {
-    if (state.message) {
-      if (state.permit) {
-        toast({
-          title: 'Success!',
-          description: state.message,
-        });
-        onPermitCreated(state.permit);
-        form.reset();
-      } else if (state.errors) {
-        toast({
-          variant: 'destructive',
-          title: 'Uh oh! Something went wrong.',
-          description: state.message,
-        });
+    if (!state.message) return;
+
+    if (state.permit) {
+      toast({
+        title: 'Success!',
+        description: state.message,
+      });
+      onPermitCreated(state.permit);
+      onOpenChange(false);
+    } else if (state.errors) {
+      toast({
+        variant: 'destructive',
+        title: 'Uh oh! Something went wrong.',
+        description: state.message,
+      });
+      for (const [key, value] of Object.entries(state.errors)) {
+        if (value) {
+          form.setError(key as keyof FormValues, { type: 'server', message: value[0] });
+        }
       }
+    } else {
+       toast({
+        variant: 'destructive',
+        title: 'An Error Occurred',
+        description: state.message,
+      });
     }
-  }, [state, onPermitCreated, toast, form]);
+  }, [state, onPermitCreated, onOpenChange, toast, form]);
 
   const handleOpenChange = (open: boolean) => {
     if (!open) {
