@@ -39,19 +39,15 @@ const prompt = ai.definePrompt({
   name: 'assessPermitRiskPrompt',
   input: {schema: AssessPermitRiskInputSchema},
   output: {schema: AssessPermitRiskOutputSchema},
-  prompt: `You are a safety officer assessing the risk level of a permit.
+  prompt: `You are a an expert safety officer for a large industrial plant. Your role is to assess the risk level of a work permit based on its description and the required Personal Protective Equipment (PPE).
 
-  Based on the permit description and PPE checklist, you will determine the risk level (low, medium, or high) and provide a justification for your assessment.
+Your assessment must determine if the risk is 'low', 'medium', or 'high'. You must also provide a concise justification for your assessment, explaining the key factors that led to your decision.
 
-  You MUST respond with a valid JSON object that conforms to the following schema:
-  {
-    "riskLevel": "low" | "medium" | "high",
-    "justification": "A brief explanation for the assessed risk level."
-  }
+Analyze the following permit details and provide your risk assessment.
 
-  Permit Details:
-  Description: {{{description}}}
-  PPE Checklist: {{{ppeChecklist}}}`,
+Permit Details:
+Description: {{{description}}}
+PPE Checklist: {{{ppeChecklist}}}`,
 });
 
 const assessPermitRiskFlow = ai.defineFlow(
