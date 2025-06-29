@@ -52,6 +52,17 @@ export default function MapPage() {
     setQrPermit(null);
   }, []);
 
+  // Memoize the MapView component to prevent it from re-initializing on re-renders
+  const memoizedMap = React.useMemo(() => {
+    return (
+      <MapView
+        permits={permits}
+        selectedPermit={selectedPermit}
+        onMarkerClick={handleMarkerClick}
+      />
+    );
+  }, [permits, selectedPermit, handleMarkerClick]);
+
   return (
     <>
       <div className="h-[calc(100vh-160px)] md:h-[calc(100vh-6.5rem)] grid md:grid-cols-[380px_1fr] lg:grid-cols-[420px_1fr]">
@@ -80,11 +91,7 @@ export default function MapPage() {
 
         {/* Map View */}
         <main className="h-full w-full">
-          <MapView
-            permits={permits}
-            selectedPermit={selectedPermit}
-            onMarkerClick={handleMarkerClick}
-          />
+          {memoizedMap}
         </main>
       </div>
 
