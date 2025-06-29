@@ -79,13 +79,21 @@ export function PermitForm({
           },
           (error) => {
             console.error("Error getting location", error);
-            const message = "Could not get location. Please enable location services and refresh.";
+            let message = "Could not get location. Please enable location services and try again.";
+            if (error.code === error.TIMEOUT) {
+                message = "Could not get location in time. Please try again with a better signal."
+            }
             setLocationError(message);
             toast({
                 variant: 'destructive',
                 title: 'Location Required',
                 description: message,
             });
+          },
+          {
+            enableHighAccuracy: true,
+            timeout: 10000, // Wait 10 seconds for a response
+            maximumAge: 0, // Do not use a cached position
           }
         );
       } else {
