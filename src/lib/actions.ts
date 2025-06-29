@@ -63,6 +63,7 @@ export async function createPermit(formData: FormData): Promise<FormState> {
     return { message: 'Permit created successfully.', permit: newPermit };
   } catch (error) {
     console.error('Error creating permit:', error);
-    return { message: 'An unexpected error occurred. Please try again.' };
+    const errorMessage = error instanceof Error ? error.message : 'An unexpected error occurred. Please try again.';
+    return { message: errorMessage };
   }
 }

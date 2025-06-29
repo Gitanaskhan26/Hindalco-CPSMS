@@ -24,10 +24,10 @@ const AssessPermitRiskOutputSchema = z.object({
     .string()
     .transform((val) => val.toLowerCase())
     .pipe(z.enum(['low', 'medium', 'high']))
-    .describe('The risk level of the permit.'),
+    .describe("The assessed risk level. MUST be one of 'low', 'medium', or 'high'."),
   justification: z
     .string()
-    .describe('The justification for the risk level assessment.'),
+    .describe('A concise justification for the assessed risk level, explaining the key factors.'),
 });
 export type AssessPermitRiskOutput = z.infer<typeof AssessPermitRiskOutputSchema>;
 
@@ -39,11 +39,8 @@ const prompt = ai.definePrompt({
   name: 'assessPermitRiskPrompt',
   input: {schema: AssessPermitRiskInputSchema},
   output: {schema: AssessPermitRiskOutputSchema},
-  prompt: `You are a an expert safety officer for a large industrial plant. Your role is to assess the risk level of a work permit based on its description and the required Personal Protective Equipment (PPE).
-
-Your assessment must determine if the risk is 'low', 'medium', or 'high'. You must also provide a concise justification for your assessment, explaining the key factors that led to your decision.
-
-Analyze the following permit details and provide your risk assessment.
+  system: `You are an expert safety officer. Your only task is to assess the risk of a work permit and respond in the requested JSON format. Do not add any other text or markdown formatting. The 'riskLevel' MUST be one of 'low', 'medium', or 'high'.`,
+  prompt: `Analyze the following permit details and provide your risk assessment.
 
 Permit Details:
 Description: {{{description}}}
@@ -59,7 +56,7 @@ const assessPermitRiskFlow = ai.defineFlow(
   async input => {
     const {output} = await prompt(input);
     if (!output) {
-      throw new Error('The AI failed to generate a valid risk assessment.');
+      throw new Error('The AI failed to generate a structured JSON response. Please try again.');
     }
     return output;
   }
