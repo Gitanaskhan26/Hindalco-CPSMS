@@ -6,7 +6,7 @@ export const Logo = ({
 }: React.HTMLAttributes<HTMLImageElement>) => {
   return (
     <img
-      src="https://storage.googleapis.com/project-spark-3c32e.appspot.com/a/studio-images/z6nLp1hIeI/logo.svg"
+      src="https://storage.googleapis.com/project-spark-3c32e.appspot.com/a/studio-images/w7Yx3tZqRf/file.png"
       alt="Hindalco Logo"
       className={className}
       {...props}
