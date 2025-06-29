@@ -14,6 +14,14 @@ import { Skeleton } from '@/components/ui/skeleton';
 import type { Permit } from '@/lib/types';
 import { initialPermits } from '@/lib/data';
 
+const MapView = dynamic(
+  () => import('@/components/map-view').then(mod => mod.MapView),
+  {
+    loading: () => <Skeleton className="h-full w-full" />,
+    ssr: false,
+  }
+);
+
 export default function MapPage() {
   const [permits, setPermits] = React.useState<Permit[]>(initialPermits);
   const [selectedPermit, setSelectedPermit] = React.useState<Permit | null>(
@@ -21,14 +29,6 @@ export default function MapPage() {
   );
   const [isFormOpen, setIsFormOpen] = React.useState(false);
   const [qrPermit, setQrPermit] = React.useState<Permit | null>(null);
-
-  const MapView = React.useMemo(() => dynamic(
-    () => import('@/components/map-view').then((mod) => mod.MapView),
-    { 
-      loading: () => <Skeleton className="h-full w-full" />,
-      ssr: false 
-    }
-  ), []);
 
   const handlePermitCreated = React.useCallback((newPermit: Permit) => {
     setPermits(prev => [newPermit, ...prev]);
@@ -39,14 +39,14 @@ export default function MapPage() {
   const handleSelectPermit = (permit: Permit) => {
     setSelectedPermit(permit);
   };
-  
+
   const handleViewQr = (permit: Permit) => {
     setQrPermit(permit);
   };
 
   const handleMarkerClick = (permit: Permit | null) => {
-      setSelectedPermit(permit);
-  }
+    setSelectedPermit(permit);
+  };
 
   return (
     <>
@@ -76,7 +76,7 @@ export default function MapPage() {
 
         {/* Map View */}
         <main className="h-full w-full">
-          <MapView 
+          <MapView
             permits={permits}
             selectedPermit={selectedPermit}
             onMarkerClick={handleMarkerClick}
@@ -89,10 +89,7 @@ export default function MapPage() {
         onOpenChange={setIsFormOpen}
         onPermitCreated={handlePermitCreated}
       />
-      <QRDialog
-        permit={qrPermit}
-        onOpenChange={() => setQrPermit(null)}
-       />
+      <QRDialog permit={qrPermit} onOpenChange={() => setQrPermit(null)} />
     </>
   );
 }
