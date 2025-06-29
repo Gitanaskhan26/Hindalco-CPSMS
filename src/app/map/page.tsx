@@ -4,6 +4,7 @@
 import * as React from 'react';
 import { Plus } from 'lucide-react';
 import dynamic from 'next/dynamic';
+import { useSearchParams } from 'next/navigation';
 
 import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
@@ -23,11 +24,24 @@ const MapView = dynamic(() => import('@/components/map-view'), {
 
 export default function MapPage() {
   const [permits, setPermits] = React.useState<Permit[]>(initialPermits);
-  const [selectedPermit, setSelectedPermit] = React.useState<Permit | null>(
-    initialPermits[0] || null
-  );
+  const [selectedPermit, setSelectedPermit] = React.useState<Permit | null>(null);
   const [isFormOpen, setIsFormOpen] = React.useState(false);
   const [qrPermit, setQrPermit] = React.useState<Permit | null>(null);
+  const searchParams = useSearchParams();
+
+  // Effect to handle selecting a permit from the URL or defaulting to the first one.
+  React.useEffect(() => {
+    const permitId = searchParams.get('permitId');
+    const permitFromUrl = permitId ? permits.find(p => p.id === permitId) : null;
+
+    if (permitFromUrl) {
+      if (selectedPermit?.id !== permitFromUrl.id) {
+        setSelectedPermit(permitFromUrl);
+      }
+    } else if (!selectedPermit && permits.length > 0) {
+      setSelectedPermit(permits[0]);
+    }
+  }, [searchParams, permits, selectedPermit]);
 
   const handlePermitCreated = React.useCallback((newPermit: Permit) => {
     setPermits(prev => [newPermit, ...prev]);

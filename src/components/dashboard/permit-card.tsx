@@ -1,7 +1,9 @@
 import { Badge } from '@/components/ui/badge';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
+import Link from 'next/link';
+import { MapPin } from 'lucide-react';
 
 type Risk = 'High' | 'Medium' | 'Low';
 type Status = 'Approved' | 'Pending' | 'Rejected';
@@ -53,11 +55,13 @@ export const PermitCard = ({
           </div>
         </div>
         
-        <div className="flex justify-between items-center mt-3">
-          <span className="text-xs text-gray-400">Yesterday, 14:30</span>
-          <Button variant="link" className="text-primary text-sm font-medium p-0 h-auto">
-            View Details
-          </Button>
+        <div className="flex justify-end items-center mt-3">
+            <Button variant="ghost" size="sm" asChild>
+                <Link href={`/map?permitId=${id}`}>
+                    <MapPin className="mr-2 h-4 w-4" />
+                    View on Map
+                </Link>
+            </Button>
         </div>
       </CardContent>
     </Card>
