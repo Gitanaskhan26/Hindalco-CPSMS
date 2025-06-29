@@ -89,10 +89,31 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
       return true;
     } catch (error) {
       console.error("Could not get visitor location.", error);
+      
+      let title = 'Location Error';
+      let description = 'Could not get your location. Please try again.';
+
+      if (error instanceof GeolocationPositionError) {
+        switch (error.code) {
+            case error.PERMISSION_DENIED:
+                title = 'Location Access Denied';
+                description = 'Please enable location permissions in your browser settings to log in.';
+                break;
+            case error.POSITION_UNAVAILABLE:
+                title = 'Location Unavailable';
+                description = 'We could not determine your location. Please check your device settings and try again.';
+                break;
+            case error.TIMEOUT:
+                title = 'Location Request Timed Out';
+                description = 'Your device took too long to respond. Please try again in an area with a better signal.';
+                break;
+        }
+      }
+
       toast({
         variant: 'destructive',
-        title: 'Location Access Required',
-        description: 'Please enable location permissions in your browser to log in. This is required to generate a valid visitor pass.',
+        title: title,
+        description: description,
       });
       setIsLoading(false);
       return false;
