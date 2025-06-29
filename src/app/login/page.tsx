@@ -1,6 +1,7 @@
 'use client';
 
 import { useRouter } from 'next/navigation';
+import Image from 'next/image';
 import { Button } from '@/components/ui/button';
 import {
   Card,
@@ -32,7 +33,7 @@ export default function LoginPage() {
           data-ai-hint="industrial safety background"
         />
         <div className="relative z-10 text-center">
-            <img src="https://storage.googleapis.com/project-spark-3c32e.appspot.com/a/studio-images/w7Yx3tZqRf/file.png" alt="Hindalco Logo" className="h-20 w-20 mx-auto mb-6" />
+            <Image src="https://storage.googleapis.com/project-spark-3c32e.appspot.com/a/studio-images/w7Yx3tZqRf/file.png" alt="Hindalco Logo" width={80} height={80} className="mx-auto mb-6" />
             <h1 className="text-4xl font-bold">
               Centralized Permit & Safety Management System
             </h1>
@@ -68,7 +69,7 @@ export default function LoginPage() {
         <Card className="w-full max-w-sm border-0 shadow-none sm:border sm:shadow-sm">
           <CardHeader className="text-center">
             <div className="mb-4 flex justify-center lg:hidden">
-                <img src="https://storage.googleapis.com/project-spark-3c32e.appspot.com/a/studio-images/w7Yx3tZqRf/file.png" alt="Hindalco Logo" className="h-12 w-12" />
+                <Image src="https://storage.googleapis.com/project-spark-3c32e.appspot.com/a/studio-images/w7Yx3tZqRf/file.png" alt="Hindalco Logo" width={48} height={48} />
             </div>
             <CardTitle className="text-2xl">Welcome Back</CardTitle>
             <CardDescription>
@@ -93,7 +94,6 @@ export default function LoginPage() {
                   id="password"
                   type="password"
                   defaultValue="password"
-                  type="password"
                   required
                 />
               </div>
