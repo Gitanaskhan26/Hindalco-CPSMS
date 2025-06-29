@@ -14,6 +14,7 @@ interface UserContextType {
   loginVisitor: (visitorId: string, dob: string) => Promise<boolean>;
   logout: () => void;
   isLoading: boolean;
+  updateUserLocation: (lat: number, lng: number) => void;
 }
 
 const UserContext = React.createContext<UserContextType | undefined>(undefined);
@@ -130,8 +131,23 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
     router.push('/login');
   };
 
+  const updateUserLocation = (lat: number, lng: number) => {
+    setUser(currentUser => {
+      if (!currentUser || currentUser.type !== 'visitor') {
+        return currentUser;
+      }
+      const updatedVisitor: Visitor = {
+        ...currentUser,
+        lat,
+        lng,
+      };
+      localStorage.setItem('user', JSON.stringify(updatedVisitor));
+      return updatedVisitor;
+    });
+  };
+
   return (
-    <UserContext.Provider value={{ user, login, loginVisitor, logout, isLoading }}>
+    <UserContext.Provider value={{ user, login, loginVisitor, logout, isLoading, updateUserLocation }}>
       {children}
     </UserContext.Provider>
   );

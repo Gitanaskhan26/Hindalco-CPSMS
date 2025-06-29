@@ -6,15 +6,50 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { LogOut, Clock, CalendarOff, MapPin, MapPinOff } from 'lucide-react';
+import { LogOut, Clock, CalendarOff, MapPin, MapPinOff, Wifi } from 'lucide-react';
 import Image from 'next/image';
-import { format } from 'date-fns';
+import { format, formatDistanceToNow } from 'date-fns';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 
 export default function VisitorPage() {
-    const { user, isLoading, logout } = useUser();
+    const { user, isLoading, logout, updateUserLocation } = useUser();
     const router = useRouter();
+    const [lastUpdated, setLastUpdated] = React.useState<Date | null>(null);
+
+     React.useEffect(() => {
+        if (!user || user.type !== 'visitor') return;
+
+        const trackLocation = () => {
+            if (!navigator.geolocation) {
+                console.warn("Geolocation is not supported by this browser.");
+                return;
+            }
+
+            navigator.geolocation.getCurrentPosition(
+                (position) => {
+                    const { latitude, longitude } = position.coords;
+                    if (user.lat !== latitude || user.lng !== longitude) {
+                        updateUserLocation(latitude, longitude);
+                    }
+                    setLastUpdated(new Date());
+                },
+                (error) => {
+                    console.warn(`Could not get location: ${error.message}`);
+                },
+                {
+                    enableHighAccuracy: true,
+                    timeout: 10000,
+                    maximumAge: 0,
+                }
+            );
+        };
+
+        trackLocation();
+        const intervalId = setInterval(trackLocation, 30000); // Update every 30 seconds
+
+        return () => clearInterval(intervalId);
+    }, [user, updateUserLocation]);
 
     React.useEffect(() => {
         if (!isLoading && (!user || user.type !== 'visitor')) {
@@ -110,6 +145,15 @@ export default function VisitorPage() {
                                    <span className="font-mono text-foreground">{lat.toFixed(4)}, {lng.toFixed(4)}</span>
                                </div>
                            )}
+                           <div className="flex items-center justify-between p-3 bg-muted/50 rounded-lg">
+                               <div className="flex items-center gap-3 text-muted-foreground">
+                                   <Wifi className="h-5 w-5 text-green-500" />
+                                   <span className="font-semibold">Location Status</span>
+                               </div>
+                               <span className="font-mono text-foreground text-xs">
+                                   {lastUpdated ? `Updated ${formatDistanceToNow(lastUpdated, { addSuffix: true })}` : 'Updating...'}
+                               </span>
+                           </div>
                         </div>
                         <p className="text-xs text-muted-foreground text-center px-4">
                             This is your digital entry pass. Please present this QR code for verification.
