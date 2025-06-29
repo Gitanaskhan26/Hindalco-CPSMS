@@ -4,7 +4,7 @@ import * as React from 'react';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
-import { Loader2, CheckCircle, AlertCircle } from 'lucide-react';
+import { Loader2 } from 'lucide-react';
 
 import { useToast } from '@/hooks/use-toast';
 import { createPermit } from '@/lib/actions';
@@ -25,7 +25,6 @@ import {
   FormLabel,
   FormMessage,
 } from '@/components/ui/form';
-import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -54,8 +53,6 @@ export function PermitForm({
 }: PermitFormProps) {
   const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = React.useState(false);
-  const [location, setLocation] = React.useState<{ lat: number; lng: number } | null>(null);
-  const [locationError, setLocationError] = React.useState<string | null>(null);
 
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
@@ -65,65 +62,11 @@ export function PermitForm({
     },
   });
 
-  React.useEffect(() => {
-    if (isOpen) {
-      setLocation(null);
-      setLocationError(null);
-      if (navigator.geolocation) {
-        navigator.geolocation.getCurrentPosition(
-          (position) => {
-            setLocation({
-              lat: position.coords.latitude,
-              lng: position.coords.longitude,
-            });
-          },
-          (error) => {
-            console.error("Error getting location", error);
-            let message = "Could not get location. Please enable location services and try again.";
-            if (error.code === error.TIMEOUT) {
-                message = "Could not get location in time. Please try again with a better signal."
-            }
-            setLocationError(message);
-            toast({
-                variant: 'destructive',
-                title: 'Location Required',
-                description: message,
-            });
-          },
-          {
-            enableHighAccuracy: true,
-            timeout: 10000, // Wait 10 seconds for a response
-            maximumAge: 0, // Do not use a cached position
-          }
-        );
-      } else {
-        const message = "Geolocation is not supported by this browser.";
-        setLocationError(message);
-        toast({
-            variant: 'destructive',
-            title: 'Location Error',
-            description: message,
-        });
-      }
-    }
-  }, [isOpen, toast]);
-
   const onSubmit = async (values: FormValues) => {
-    if (!location) {
-      toast({
-        variant: 'destructive',
-        title: 'Location Required',
-        description: 'Cannot create a permit without your location.',
-      });
-      return;
-    }
-
     setIsSubmitting(true);
     const formData = new FormData();
     formData.append('description', values.description);
     formData.append('ppeChecklist', values.ppeChecklist);
-    formData.append('lat', String(location.lat));
-    formData.append('lng', String(location.lng));
 
     try {
       const result = await createPermit(formData);
@@ -178,7 +121,7 @@ export function PermitForm({
         <DialogHeader>
           <DialogTitle>Create New Permit</DialogTitle>
           <DialogDescription>
-            Fill in the details below. Your current location will be tagged for mapping.
+            Fill in the details below. A location will be assigned within the plant.
           </DialogDescription>
         </DialogHeader>
         <Form {...form}>
@@ -210,38 +153,9 @@ export function PermitForm({
               )}
             />
 
-            <div className="space-y-2">
-              <FormLabel>Location Status</FormLabel>
-               {locationError && (
-                <Alert variant="destructive">
-                  <AlertCircle className="h-4 w-4" />
-                  <AlertTitle>Error</AlertTitle>
-                  <AlertDescription>{locationError}</AlertDescription>
-                </Alert>
-              )}
-              {!location && !locationError && (
-                <Alert>
-                   <Loader2 className="h-4 w-4 animate-spin" />
-                   <AlertTitle>Please Wait</AlertTitle>
-                  <AlertDescription>
-                    Fetching your current location...
-                  </AlertDescription>
-                </Alert>
-              )}
-              {location && (
-                <Alert className="border-green-500/50 text-green-700 [&>svg]:text-green-700">
-                  <CheckCircle className="h-4 w-4" />
-                  <AlertTitle>Success</AlertTitle>
-                  <AlertDescription>
-                    Location captured successfully.
-                  </AlertDescription>
-                </Alert>
-              )}
-            </div>
-
             <DialogFooter>
               <Button variant="ghost" onClick={() => onOpenChange(false)} type="button">Cancel</Button>
-              <Button type="submit" disabled={isSubmitting || !location}>
+              <Button type="submit" disabled={isSubmitting}>
                 {isSubmitting ? (
                   <>
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />

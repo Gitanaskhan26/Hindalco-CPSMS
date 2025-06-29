@@ -7,8 +7,6 @@ import type { Permit } from './types';
 const permitSchema = z.object({
   description: z.string().min(10, 'Description must be at least 10 characters.'),
   ppeChecklist: z.string().min(5, 'PPE checklist must be at least 5 characters.'),
-  lat: z.coerce.number(),
-  lng: z.coerce.number(),
 });
 
 type FormState = {
@@ -16,18 +14,18 @@ type FormState = {
   errors?: {
     description?: string[];
     ppeChecklist?: string[];
-    lat?: string[];
-    lng?: string[];
   };
   permit?: Permit;
 };
+
+// Default location for new permits
+const plantLat = 24.2045;
+const plantLng = 83.0396;
 
 export async function createPermit(formData: FormData): Promise<FormState> {
   const validatedFields = permitSchema.safeParse({
     description: formData.get('description'),
     ppeChecklist: formData.get('ppeChecklist'),
-    lat: formData.get('lat'),
-    lng: formData.get('lng'),
   });
 
   if (!validatedFields.success) {
@@ -38,7 +36,7 @@ export async function createPermit(formData: FormData): Promise<FormState> {
   }
 
   try {
-    const { description, ppeChecklist, lat, lng } = validatedFields.data;
+    const { description, ppeChecklist } = validatedFields.data;
     const assessment = await assessPermitRisk({ description, ppeChecklist });
 
     const id = crypto.randomUUID();
@@ -55,8 +53,8 @@ export async function createPermit(formData: FormData): Promise<FormState> {
       ppeChecklist,
       ...assessment,
       status: 'Approved',
-      lat,
-      lng,
+      lat: plantLat + (Math.random() - 0.5) * 0.02, // Add some randomness to avoid all permits at the exact same spot
+      lng: plantLng + (Math.random() - 0.5) * 0.02,
       qrCodeUrl,
     };
 
