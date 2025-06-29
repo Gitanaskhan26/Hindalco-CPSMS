@@ -27,16 +27,14 @@ const createCustomIcon = (riskLevel: RiskLevel) => {
 };
 
 // --- Map Layers Component ---
-// This component contains all the dynamic parts of the map (markers, popups, effects)
-// It assumes it will be rendered inside a MapContainer.
-
+// This is now an internal component and is not exported.
 interface MapLayersProps {
   permits: Permit[];
   selectedPermit: Permit | null;
   onMarkerClick: (permit: Permit | null) => void;
 }
 
-export function MapLayers({
+function MapLayers({
   permits,
   selectedPermit,
   onMarkerClick,
@@ -107,15 +105,17 @@ export function MapLayers({
   );
 }
 
-// --- Map View Component (The Stable Container) ---
-// This component only sets up the map and renders children. It takes no changing props.
-// It will be dynamically imported on the page.
+// --- Map View Component (The Self-Contained Container) ---
+// It now accepts all necessary props and renders its layers internally.
+// This is the component that will be dynamically imported on the page.
 
 interface MapViewProps {
-  children: React.ReactNode;
+  permits: Permit[];
+  selectedPermit: Permit | null;
+  onMarkerClick: (permit: Permit | null) => void;
 }
 
-export function MapView({ children }: MapViewProps) {
+export function MapView({ permits, selectedPermit, onMarkerClick }: MapViewProps) {
   const defaultPosition: L.LatLngExpression = [22.5726, 88.3639];
 
   return (
@@ -129,7 +129,11 @@ export function MapView({ children }: MapViewProps) {
         attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
         url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
       />
-      {children}
+      <MapLayers
+        permits={permits}
+        selectedPermit={selectedPermit}
+        onMarkerClick={onMarkerClick}
+      />
     </MapContainer>
   );
 }
