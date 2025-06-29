@@ -63,10 +63,12 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
       toast({
         variant: 'destructive',
         title: 'Location Not Supported',
-        description: 'Your browser does not support geolocation. Please use a different browser.',
+        description: 'Your browser does not support geolocation. The QR pass cannot be generated.',
       });
+      setUser(visitor);
+      localStorage.setItem('user', JSON.stringify(visitor));
       setIsLoading(false);
-      return false;
+      return true;
     }
 
     try {
@@ -91,21 +93,21 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
       console.error("Could not get visitor location.", error);
       
       let title = 'Location Error';
-      let description = 'Could not get your location. Please try again.';
+      let description = 'Could not get your location. The QR code cannot be generated without it.';
 
       if (error instanceof GeolocationPositionError) {
         switch (error.code) {
             case error.PERMISSION_DENIED:
                 title = 'Location Access Denied';
-                description = 'Please enable location permissions in your browser settings to log in.';
+                description = 'Please enable location permissions to generate a QR pass.';
                 break;
             case error.POSITION_UNAVAILABLE:
                 title = 'Location Unavailable';
-                description = 'We could not determine your location. Please check your device settings and try again.';
+                description = 'We could not determine your location, so the QR pass cannot be generated.';
                 break;
             case error.TIMEOUT:
                 title = 'Location Request Timed Out';
-                description = 'Your device took too long to respond. Please try again in an area with a better signal.';
+                description = 'Your device took too long to respond, so the QR pass cannot be generated.';
                 break;
         }
       }
@@ -115,8 +117,12 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
         title: title,
         description: description,
       });
+
+      // Log the user in anyway, but without location data.
+      setUser(visitor);
+      localStorage.setItem('user', JSON.stringify(visitor));
       setIsLoading(false);
-      return false;
+      return true;
     }
   };
 
