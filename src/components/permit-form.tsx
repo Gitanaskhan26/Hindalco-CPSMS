@@ -1,11 +1,11 @@
 'use client';
 
 import * as React from 'react';
-import { useFormStatus } from 'react-dom';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { Loader2, CheckCircle, AlertCircle } from 'lucide-react';
+
 import { useToast } from '@/hooks/use-toast';
 import { createPermit } from '@/lib/actions';
 import type { Permit } from '@/lib/types';
@@ -47,29 +47,13 @@ const formSchema = z.object({
 
 type FormValues = z.infer<typeof formSchema>;
 
-function SubmitButton({ disabled }: { disabled?: boolean }) {
-  const { pending } = useFormStatus();
-  return (
-    <Button type="submit" disabled={pending || disabled}>
-      {pending ? (
-        <>
-          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-          Assessing Risk...
-        </>
-      ) : (
-        'Create and Assess Risk'
-      )}
-    </Button>
-  );
-}
-
 export function PermitForm({
   isOpen,
   onOpenChange,
   onPermitCreated,
 }: PermitFormProps) {
   const { toast } = useToast();
-  const [state, formAction] = React.useActionState(createPermit, { message: '' });
+  const [isSubmitting, setIsSubmitting] = React.useState(false);
   const [location, setLocation] = React.useState<{ lat: number; lng: number } | null>(null);
   const [locationError, setLocationError] = React.useState<string | null>(null);
 
@@ -116,35 +100,62 @@ export function PermitForm({
     }
   }, [isOpen, toast]);
 
-  React.useEffect(() => {
-    if (!state.message) return;
-
-    if (state.permit) {
-      toast({
-        title: 'Success!',
-        description: state.message,
-      });
-      onPermitCreated(state.permit);
-      onOpenChange(false);
-    } else if (state.errors) {
+  const onSubmit = async (values: FormValues) => {
+    if (!location) {
       toast({
         variant: 'destructive',
-        title: 'Uh oh! Something went wrong.',
-        description: state.message,
+        title: 'Location Required',
+        description: 'Cannot create a permit without your location.',
       });
-      for (const [key, value] of Object.entries(state.errors)) {
-        if (value) {
-          form.setError(key as keyof FormValues, { type: 'server', message: value[0] });
-        }
-      }
-    } else {
-       toast({
-        variant: 'destructive',
-        title: 'An Error Occurred',
-        description: state.message,
-      });
+      return;
     }
-  }, [state, onPermitCreated, onOpenChange, toast, form]);
+
+    setIsSubmitting(true);
+    const formData = new FormData();
+    formData.append('description', values.description);
+    formData.append('ppeChecklist', values.ppeChecklist);
+    formData.append('lat', String(location.lat));
+    formData.append('lng', String(location.lng));
+
+    try {
+      const result = await createPermit(formData);
+
+      if (result.permit) {
+        toast({
+          title: 'Success!',
+          description: result.message,
+        });
+        onPermitCreated(result.permit);
+        onOpenChange(false);
+      } else if (result.errors) {
+        toast({
+          variant: 'destructive',
+          title: 'Uh oh! Something went wrong.',
+          description: result.message,
+        });
+        for (const [key, value] of Object.entries(result.errors)) {
+          if (value) {
+            form.setError(key as keyof FormValues, { type: 'server', message: value[0] });
+          }
+        }
+      } else {
+         toast({
+          variant: 'destructive',
+          title: 'An Error Occurred',
+          description: result.message,
+        });
+      }
+    } catch (error) {
+      console.error('Permit submission failed', error);
+      toast({
+        variant: 'destructive',
+        title: 'Submission Error',
+        description: 'An unexpected error occurred while creating the permit.',
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
 
   const handleOpenChange = (open: boolean) => {
     if (!open) {
@@ -163,14 +174,7 @@ export function PermitForm({
           </DialogDescription>
         </DialogHeader>
         <Form {...form}>
-          <form action={formAction} className="space-y-4">
-             {location && (
-              <>
-                <input type="hidden" name="lat" value={location.lat} />
-                <input type="hidden" name="lng" value={location.lng} />
-              </>
-            )}
-
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
             <FormField
               control={form.control}
               name="description"
@@ -229,7 +233,16 @@ export function PermitForm({
 
             <DialogFooter>
               <Button variant="ghost" onClick={() => onOpenChange(false)} type="button">Cancel</Button>
-              <SubmitButton disabled={!location} />
+              <Button type="submit" disabled={isSubmitting || !location}>
+                {isSubmitting ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Assessing Risk...
+                  </>
+                ) : (
+                  'Create and Assess Risk'
+                )}
+              </Button>
             </DialogFooter>
           </form>
         </Form>

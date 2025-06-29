@@ -22,10 +22,7 @@ type FormState = {
   permit?: Permit;
 };
 
-export async function createPermit(
-  prevState: FormState,
-  formData: FormData
-): Promise<FormState> {
+export async function createPermit(formData: FormData): Promise<FormState> {
   const validatedFields = permitSchema.safeParse({
     description: formData.get('description'),
     ppeChecklist: formData.get('ppeChecklist'),
@@ -35,7 +32,7 @@ export async function createPermit(
 
   if (!validatedFields.success) {
     return {
-      message: 'Please check your input. Location is required.',
+      message: 'Please check your input. All fields are required.',
       errors: validatedFields.error.flatten().fieldErrors,
     };
   }
