@@ -126,16 +126,53 @@ src
 
 ### Key Component Functionality
 
--   **`user-context.tsx`**: Manages the global authentication state. It handles login/logout logic, persists the user session to `localStorage` for session continuity, and provides user data (like name, department, etc.) to all components through a React Context. This avoids prop-drilling and provides a single source of truth for the logged-in user.
--   **`app-wrapper.tsx`**: A critical client component that wraps all pages. It reads the user state from `UserContext` and performs necessary redirects. For example, it sends unauthenticated users to the login page and ensures that visitors cannot access employee-only dashboards. It's the gatekeeper for the application's routes.
--   **Login Pages (`app/login/**`)**: Client components that handle user input for authentication. They capture credentials, call the respective `login` or `loginVisitor` functions from `UserContext`, and display success or error feedback to the user using toast notifications.
--   **Dashboard (`app/page.tsx`)**: The central hub for employees. It uses **Role-Based Access Control (RBAC)** to conditionally render components based on the logged-in user's department.
-    -   **Safety Dept**: Sees a "High-Risk Permits for Review" card to draw immediate attention to critical tasks.
-    -   **Security Dept**: Sees a "Request Visitor Pass" button, providing a shortcut to a common task for that role.
--   **`permit-form.tsx`**: A dialog containing a form managed by `react-hook-form` for performance and `zod` for validation. On submission, it doesn't send a typical API request. Instead, it directly calls the `createPermit` Server Action, passing the form data. This provides a seamless, type-safe connection between the frontend form and the backend logic.
--   **`actions.ts`**: Contains the core backend logic. The `createPermit` function validates input using Zod, calls the `assessPermitRisk` AI flow, generates a unique ID and QR code URL, and simulates saving a new permit to the database. This file runs **only on the server**, protecting business logic and secrets.
--   **`map-view.tsx`**: A client component that dynamically imports and renders a Leaflet map to avoid bloating the initial page load. It receives permit and visitor data as props and is responsible for rendering custom markers (color-coded pins for permits, glowing dots for visitors). It also handles user interactions like clicking on a marker to view its details.
--   **`visitor-page.tsx`**: A dedicated view for a logged-in visitor, displaying their digital pass with a unique QR code. It continuously tracks their location in the background (while the tab is open) by calling the `updateUserLocation` function in the `UserContext`, allowing their position to be updated on the main plant map.
+## 4. Detailed System Workflows
+
+This section describes the end-to-end processes for different users of the C-PSMS application.
+
+### 4.1 Employee Workflow: Role-Based Dashboards
+The employee experience is tailored to their role, providing relevant information and actions to maximize efficiency and safety.
+
+1.  **Authentication**: An employee starts at the **`login`** page. They enter their unique Employee Code and Date of Birth. This data is handled by the `useUser` context, which calls a mock backend service (`fetchEmployeeDetails`). Upon successful validation, the employee's profile (including name, department, and designation) is stored in the React Context and persisted to `localStorage` to maintain the session. The `AppWrapper` component then redirects them to the main dashboard.
+
+2.  **The Main Dashboard (`/page.tsx`)**: This is the central hub for employees. It provides a high-level overview of plant safety through several key components:
+    *   **Stats Cards**: Display key metrics like "Active Permits," "Pending Approval," and "High Risk Today."
+    *   **Recent Permits & Visitors**: Lists of the most recently created permits and currently active visitors, offering quick access to their details.
+
+3.  **Role-Based Access Control (RBAC) in Action**: The dashboard dynamically adapts based on the logged-in employee's department, a core feature of the system:
+    *   **For the Safety Department**: A prominent **"High-Risk Permits for Review"** card is displayed at the top. This card is conditionally rendered only for users in the "Safety" or "Fire and Safety" departments. It filters for permits that are both `high-risk` and `pending`, allowing safety officers to immediately prioritize and address the most critical tasks.
+    *   **For the Security Department**: A **"Request Visitor Pass"** button is added to the header actions. This provides a direct shortcut to the `VisitorRequestForm` dialog, a common and critical task for the security team. This button is only visible to users in the "Security" department.
+    *   All other employees see a standard view, ensuring the interface remains uncluttered and relevant to their roles.
+
+### 4.2 Permit Creation & AI Risk Assessment
+This workflow streamlines the creation of a work permit and leverages AI for an instant, unbiased risk assessment.
+
+1.  **Initiation**: An employee clicks the "New Permit" button, which opens the **`PermitForm`** dialog.
+2.  **Data Entry**: The form, managed by `react-hook-form` and validated by `zod`, captures the essential details: a description of the work to be performed and a list of the required Personal Protective Equipment (PPE).
+3.  **Server Action**: Upon submission, the form doesn't make a traditional API call. Instead, it directly invokes the **`createPermit` Server Action** located in `src/lib/actions.ts`. This ensures the entire process is type-safe from front to back.
+4.  **AI Analysis**: The `createPermit` action, running securely on the server, calls the **`assessPermitRisk` Genkit flow**. This AI flow takes the work description and PPE list, sends them to the Google AI platform with a specialized prompt, and receives a structured JSON response containing a `riskLevel` ('low', 'medium', or 'high') and a `justification`.
+5.  **Finalization**: The server action then generates a unique permit ID, creates a QR code URL containing the permit's essential data, and combines all this information into a new `Permit` object.
+6.  **UI Update**: The `createPermit` action returns the newly created permit object to the client-side component, which then updates the application's state, adding the new permit to the list and map in real-time.
+
+### 4.3 Visitor Workflow: Secure Access & Live Tracking
+This process ensures that visitors are properly authenticated and their location is tracked while on-site.
+
+1.  **Visitor Authentication**: Visitors use a separate, streamlined login page at **`/login/visitor`**. They enter a pre-issued Visitor ID and their Date of Birth.
+2.  **Geolocation & QR Code Generation**: Upon successful login, the application immediately requests access to the user's device location via the browser's Geolocation API.
+    *   **If Successful**: The visitor's latitude and longitude are captured and stored in their session. This location data is essential for generating a valid QR code for their digital pass.
+    *   **If Denied or Failed**: The user is still logged in, but a prominent alert appears on their page explaining that location access is required to generate the QR code pass. This prevents visitors from moving around the facility without being trackable on the map.
+3.  **The Visitor Page (`/visitor/page.tsx`)**: This page serves as the visitor's digital identity within the plant.
+    *   It displays their name, photo, and the validity period of their pass.
+    *   The centerpiece is the unique QR code, which security can scan for instant verification.
+    *   In the background, a `useEffect` hook periodically calls `navigator.geolocation.getCurrentPosition` (e.g., every 30 seconds). If a new location is detected, it calls the `updateUserLocation` function from the `UserContext`. This updates the visitor's coordinates in the global state, ensuring their position is updated in near real-time on the main plant map.
+
+### 4.4 The Interactive Plant Map: Centralized Situational Awareness
+The map is the visual heart of the C-PSMS, providing a live overview of all activities.
+
+-   **Visualization**: The **`MapView`** component uses the Leaflet library to display a map of the plant. It fetches all active permits and visitors and renders them as custom markers.
+-   **Permit Markers**: Permits are shown as color-coded map pins (Red for High, Orange for Medium, Green for Low risk), allowing for immediate visual risk assessment.
+-   **Visitor Markers**: Visitors are represented by glowing blue dots, making them easily distinguishable from work permits.
+-   **Interactivity**: Clicking on any marker (permit or visitor) pans the map to center it, scales it up to indicate selection, and opens a popup with key details (like Permit ID or Visitor Name). This action also updates the state of the parent page to highlight the corresponding card in the sidebar list, creating a seamless, connected experience between the map and the list view.
 
 ## 5. Getting Started
 
