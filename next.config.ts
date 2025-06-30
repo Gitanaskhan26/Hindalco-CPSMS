@@ -2,7 +2,8 @@ import type {NextConfig} from 'next';
 
 const nextConfig: NextConfig = {
   /* config options here */
-  output: 'standalone', // Force dynamic output instead of static export
+  output: process.env.NODE_ENV === 'production' ? 'standalone' : undefined,
+  trailingSlash: false,
   typescript: {
     ignoreBuildErrors: true,
   },
