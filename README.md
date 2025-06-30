@@ -18,8 +18,39 @@ The C-PSMS MVP is a digital permit-to-work system designed to enhance safety and
 
 The application is built as a modern, monolithic web application using the Next.js App Router. This architecture integrates the frontend and backend into a single, cohesive codebase, simplifying development and deployment for the MVP.
 
-![System Architecture Diagram](https://placehold.co/800x450.png?text=System%20Architecture%20Diagram)
-*<p align="center" data-ai-hint="architecture diagram">Diagram outlining the flow from client to Next.js server, Genkit, and back.</p>*
+```
++----------------+
+| User (Browser) |
++----------------+
+       |
+       v (HTTPS)
++-----------------------------------------------------------+
+|             Next.js Application (on Node.js)              |
+|-----------------------------------------------------------|
+|                                                           |
+| [ Frontend: React Components, UI/UX (ShadCN, Tailwind) ]  |
+|         (Client-side Interactivity, Rendering)            |
+|                                                           |
+|                      ^          |                         |
+| (Rendered HTML/CSS)  |          v (Calls Server Actions)  |
+|                      |                                    |
+| [ Backend: Server Logic & Data Fetching (`'use server'`) ]|
+|   (Handles mutations, business logic, auth checks)        |
+|         |                  |                   |          |
++---------|------------------|-------------------|----------+
+          | (Server-side)    | (Server-side)     | (Server-side)
+          v                  v                   v
++-----------------+  +-----------------+ +-------------------+
+| Genkit AI Flow  |  | Mock Database   | | External Services |
+| (assessPermit..)|  | (`/lib/*.ts`)   | |-------------------|
++-----------------+  +-----------------+ | - Leaflet Tiles   |
+          |                              | - QR Server API   |
+          v (API Call)                   +-------------------+
++-----------------+
+| Google AI       |
+| Platform        |
++-----------------+
+```
 
 -   **Frontend**: Built with **React** and **Next.js**, utilizing the App Router for routing and layout management. The UI is composed of **Server Components** by default for improved performance and **Client Components** (`'use client'`) for interactivity.
 -   **Backend**: The backend is powered by **Node.js** and is fully integrated within Next.js. We use **Server Actions** to handle all data mutations (e.g., creating permits, requesting visitor passes) securely on the server without needing to write separate API endpoints.
@@ -131,7 +162,7 @@ You will need a Google AI API key to run the AI risk assessment feature.
     ```
 
 2.  **Run the development server:**
-    The application runs on `http://localhost:9002`.
+    The application runs on `http://localhost:9003`.
     ```bash
     npm run dev
     ```
