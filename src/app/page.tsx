@@ -79,7 +79,7 @@ export default function Home() {
   );
 
   const isSecurity = user?.type === 'employee' && user.department === 'Security';
-  const isSafety = user?.type === 'employee' && user.department === 'Safety';
+  const isSafety = user?.type === 'employee' && (user.department === 'Safety' || user.department === 'Fire and Safety');
 
   return (
     <>

@@ -42,6 +42,23 @@ interface VisitorRequestFormProps {
   onVisitorRequestSent: () => void;
 }
 
+const departments: Department[] = [
+  'Maintenance',
+  'Production',
+  'Safety',
+  'Security',
+  'IT',
+  'Finance',
+  'Fire and Safety',
+  'Alumina Plant',
+  'Rectifier',
+  'HVAC',
+  'Smelter',
+  'Logistics',
+  'Human Resources',
+  'Quality Control',
+];
+
 const formSchema = z.object({
   visitorName: z.string().min(2, {
     message: 'Visitor name must be at least 2 characters.',
@@ -49,14 +66,12 @@ const formSchema = z.object({
   purpose: z.string().min(10, {
     message: 'Purpose of visit must be at least 10 characters.',
   }),
-  visitingDepartment: z.enum(['Maintenance', 'Production', 'Safety', 'Security'], {
+  visitingDepartment: z.enum(departments as [string, ...string[]], {
       errorMap: () => ({ message: "Please select a department." }),
   }),
 });
 
 type FormValues = z.infer<typeof formSchema>;
-
-const departments: Department[] = ['Maintenance', 'Production', 'Safety', 'Security'];
 
 export function VisitorRequestForm({
   isOpen,

@@ -17,7 +17,7 @@ export const mockEmployees: Omit<Employee, 'type'>[] = [
     name: 'Sunita Sharma',
     avatarUrl: 'https://placehold.co/40x40.png',
     avatarHint: 'woman portrait',
-    department: 'Safety',
+    department: 'Fire and Safety',
     designation: 'Safety Officer',
   },
   {
@@ -44,7 +44,7 @@ export const mockEmployees: Omit<Employee, 'type'>[] = [
     name: 'Rajesh Singh',
     avatarUrl: 'https://placehold.co/40x40.png',
     avatarHint: 'man portrait',
-    department: 'Maintenance',
+    department: 'Smelter',
     designation: 'Senior Technician',
   },
   {
@@ -53,7 +53,7 @@ export const mockEmployees: Omit<Employee, 'type'>[] = [
     name: 'Meena Iyer',
     avatarUrl: 'https://placehold.co/40x40.png',
     avatarHint: 'woman portrait',
-    department: 'Production',
+    department: 'Alumina Plant',
     designation: 'Operator',
   },
   {
@@ -80,7 +80,7 @@ export const mockEmployees: Omit<Employee, 'type'>[] = [
     name: 'Suresh Patel',
     avatarUrl: 'https://placehold.co/40x40.png',
     avatarHint: 'man portrait professional',
-    department: 'Maintenance',
+    department: 'HVAC',
     designation: 'Mechanical Engineer',
   },
   {
@@ -89,8 +89,8 @@ export const mockEmployees: Omit<Employee, 'type'>[] = [
     name: 'Kavita Nair',
     avatarUrl: 'https://placehold.co/40x40.png',
     avatarHint: 'woman portrait glasses',
-    department: 'Production',
-    designation: 'Quality Assurance',
+    department: 'Quality Control',
+    designation: 'Lab Technician',
   },
   {
     id: '89012',
@@ -98,7 +98,7 @@ export const mockEmployees: Omit<Employee, 'type'>[] = [
     name: 'Deepak Chopra',
     avatarUrl: 'https://placehold.co/40x40.png',
     avatarHint: 'man portrait bearded',
-    department: 'Safety',
+    department: 'Fire and Safety',
     designation: 'EHS Coordinator',
   },
   {
@@ -107,7 +107,7 @@ export const mockEmployees: Omit<Employee, 'type'>[] = [
     name: 'Priya Reddy',
     avatarUrl: 'https://placehold.co/40x40.png',
     avatarHint: 'woman portrait smiling',
-    department: 'Maintenance',
+    department: 'Rectifier',
     designation: 'Electrical Technician',
   },
   {
@@ -143,7 +143,7 @@ export const mockEmployees: Omit<Employee, 'type'>[] = [
     name: 'Sneha Gupta',
     avatarUrl: 'https://placehold.co/40x40.png',
     avatarHint: 'woman portrait professional',
-    department: 'Production',
+    department: 'IT',
     designation: 'Junior Engineer',
   },
   {
@@ -152,8 +152,8 @@ export const mockEmployees: Omit<Employee, 'type'>[] = [
     name: 'Alok Nath',
     avatarUrl: 'https://placehold.co/40x40.png',
     avatarHint: 'man portrait older',
-    department: 'Safety',
-    designation: 'Senior Safety Officer',
+    department: 'Finance',
+    designation: 'Senior Accountant',
   },
   {
     id: '67892',
@@ -170,8 +170,8 @@ export const mockEmployees: Omit<Employee, 'type'>[] = [
     name: 'Ishan Kishan',
     avatarUrl: 'https://placehold.co/40x40.png',
     avatarHint: 'man portrait young',
-    department: 'Maintenance',
-    designation: 'Fitter',
+    department: 'Logistics',
+    designation: 'Supply Chain Coordinator',
   },
 ];
 

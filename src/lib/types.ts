@@ -1,6 +1,20 @@
 export type RiskLevel = 'low' | 'medium' | 'high';
 export type PermitStatus = 'Approved' | 'Pending' | 'Rejected';
-export type Department = 'Safety' | 'Security' | 'Maintenance' | 'Production';
+export type Department =
+  | 'Safety'
+  | 'Security'
+  | 'Maintenance'
+  | 'Production'
+  | 'IT'
+  | 'Finance'
+  | 'Fire and Safety'
+  | 'Alumina Plant'
+  | 'Rectifier'
+  | 'HVAC'
+  | 'Smelter'
+  | 'Logistics'
+  | 'Human Resources'
+  | 'Quality Control';
 
 export type Permit = {
   id: string;

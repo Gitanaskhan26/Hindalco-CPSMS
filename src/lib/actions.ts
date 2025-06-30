@@ -67,10 +67,27 @@ export async function createPermit(formData: FormData): Promise<FormState> {
 }
 
 
+const departments: Department[] = [
+  'Maintenance',
+  'Production',
+  'Safety',
+  'Security',
+  'IT',
+  'Finance',
+  'Fire and Safety',
+  'Alumina Plant',
+  'Rectifier',
+  'HVAC',
+  'Smelter',
+  'Logistics',
+  'Human Resources',
+  'Quality Control',
+];
+
 const visitorRequestSchema = z.object({
     visitorName: z.string().min(2, 'Visitor name is required.'),
     purpose: z.string().min(10, 'Purpose must be at least 10 characters.'),
-    visitingDepartment: z.enum(['Maintenance', 'Production', 'Safety', 'Security']),
+    visitingDepartment: z.enum(departments as [string, ...string[]]),
 });
 
 type VisitorRequestFormState = {
