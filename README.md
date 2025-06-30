@@ -1,4 +1,3 @@
-
 # Hindalco C-PSMS MVP: System Design & Architecture
 
 This document provides a comprehensive overview of the Hindalco Centralized Permit & Safety Management System (C-PSMS) MVP. It details the system architecture, technology stack, and functionality of its core components.
@@ -17,7 +16,7 @@ The C-PSMS MVP is a digital permit-to-work system designed to enhance safety and
 
 ## 2. System Architecture
 
-The application is built as a modern, monolithic web application using the Next.js App Router. This architecture integrates the frontend and backend into a single, cohesive codebase, simplifying development and deployment.
+The application is built as a modern, monolithic web application using the Next.js App Router. This architecture integrates the frontend and backend into a single, cohesive codebase, simplifying development and deployment for the MVP.
 
 ![System Architecture Diagram](https://placehold.co/800x450.png?text=System%20Architecture%20Diagram)
 *<p align="center" data-ai-hint="architecture diagram">Diagram outlining the flow from client to Next.js server, Genkit, and back.</p>*
@@ -27,7 +26,18 @@ The application is built as a modern, monolithic web application using the Next.
 -   **AI Integration**: Artificial intelligence capabilities are handled by **Genkit**. The `assessPermitRisk` flow is a server-side function that communicates with the Google AI platform to analyze permit data and return a structured risk assessment.
 -   **Styling**: A combination of **Tailwind CSS** for utility-first styling and **ShadCN UI** for a pre-built, accessible, and themeable component library. The theme is customized to match Hindalco's branding guidelines.
 -   **State Management**: Global user authentication and session state are managed using **React Context API** (`UserProvider`). For complex form state, we use **React Hook Form** with **Zod** for schema validation.
--   **Database (Mocked)**: In this MVP, the database is simulated using mock data arrays stored in the `src/lib/` directory. These files export functions that mimic database queries, making it straightforward to replace them with a real database connection (e.g., Firebase Firestore, PostgreSQL) in the future.
+-   **Database (Mocked)**: In this MVP, the database is simulated using mock data arrays stored in the `src/lib/` directory. These files export functions that mimic database queries.
+
+### MVP vs. Production Architecture
+
+It is important to note the distinction between the current prototype architecture and the proposed architecture for a full-scale production deployment.
+
+-   **Current MVP Architecture**: The application uses a **monolithic Next.js structure**. The backend logic (Server Actions) is tightly coupled with the frontend framework. This is highly efficient for rapid prototyping and development.
+-   **Proposed Production Architecture**: For a production model, a more scalable, decoupled architecture is recommended. This would involve:
+    -   A dedicated **backend service** built with **Node.js and Express.js**.
+    -   A **PostgreSQL** database managed with the **Prisma ORM**.
+    -   The Next.js frontend would communicate with the backend via a secure **REST or GraphQL API**.
+    This separation of concerns provides better scalability, maintainability, and allows for independent development and deployment of the frontend and backend services.
 
 ## 3. Technology Stack
 
@@ -42,6 +52,8 @@ The application is built as a modern, monolithic web application using the Next.
 | **Mapping**     | [Leaflet](https://leafletjs.com/)             | An open-source JavaScript library for interactive maps.                            |
 | **Validation**  | [Zod](https://zod.dev/)                       | TypeScript-first schema validation for forms and API responses.                  |
 | **Forms**       | [React Hook Form](https://react-hook-form.com/) | Performant and flexible library for managing form state and validation.          |
+
+**Note on Production Stack:** The technology choices above reflect the current prototype. As detailed in the architecture section, a production version of this application would evolve to use a dedicated **Node.js + Express.js backend** with a **PostgreSQL** database and **Prisma ORM**, separating it from the Next.js frontend.
 
 ---
 
@@ -126,7 +138,7 @@ You will need a Google AI API key to run the AI risk assessment feature.
 
 ## 6. Future Improvements
 
--   **Database Integration**: Replace the mock data files in `src/lib/` with a real database service like **Firebase Firestore** or a SQL database.
+-   **Production Backend & Database Integration**: Transition from the integrated Next.js backend to a dedicated **Node.js + Express.js** service. Replace the mock data files in `src/lib/` with a real database connection to **PostgreSQL**, managed by **Prisma ORM**.
 -   **Real-time Notifications**: Implement a real-time notification system (e.g., using WebSockets or a service like Firebase) for permit approvals and visitor requests.
 -   **Full Visitor Approval Workflow**: Build the UI for department heads to approve or reject visitor pass requests.
 -   **QR Code Scanning Logic**: Implement the client-side logic in `scan/page.tsx` to use the camera feed to read QR codes and validate them against the backend.
