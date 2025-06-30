@@ -242,5 +242,29 @@ Of course! Setting up the project for local testing is a great next step. I've a
 The application will then be available for you to test at **`http://localhost:9003`** in your web browser.
 
 Let me know if you have any other questions
-```
 
+##7. Mock Data For Testing.
+
+You can use these for testing the different departmental features.
+
+| Employee ID | Name           | Date of Birth | Department   | Designation             |
+|-------------|----------------|---------------|--------------|-------------------------|
+| 12345      | Ramesh Kumar   | 1990-01-15    | Maintenance  | Lead Engineer           |
+| 67890      | Sunita Sharma  | 1985-05-20    | Safety       | Safety Officer          |
+| 11223      | Anil Mehta     | 1982-08-01    | Security     | Head of Security        |
+| 44556      | Pooja Desai    | 1992-03-30    | Production   | Shift Supervisor        |
+| 23456      | Rajesh Singh   | 1988-04-12    | Maintenance  | Senior Technician       |
+| 34567      | Meena Iyer     | 1995-11-23    | Production   | Operator                |
+| 45678      | Vikram Rathod  | 1979-02-18    | Safety       | Safety Inspector        |
+| 56789      | Geeta Joshi    | 1993-07-05    | Security     | Security Guard          |
+| 67891      | Suresh Patel   | 1980-09-14    | Maintenance  | Mechanical Engineer     |
+| 78901      | Kavita Nair    | 1991-01-28    | Production   | Quality Assurance       |
+| 89012      | Deepak Chopra  | 1987-06-19    | Safety       | EHS Coordinator         |
+| 90123      | Priya Reddy    | 1996-12-30    | Maintenance  | Electrical Technician   |
+| 12346      | Harish Tiwari  | 1984-10-02    | Production   | Shift In-charge         |
+| 23457      | Fatima Khan    | 1990-08-15    | Security     | CCTV Operator           |
+| 34568      | Manoj Verma    | 1986-03-25    | Maintenance  | Welder                  |
+| 45679      | Sneha Gupta    | 1994-05-11    | Production   | Junior Engineer         |
+| 56790      | Alok Nath      | 1975-11-08    | Safety       | Senior Safety Officer   |
+| 67892      | Sandeep Yadav  | 1989-07-22    | Security     | Patrol Officer          |
+| 78902      | Ishan Kishan   | 1998-02-09    | Maintenance  | Fitter                  |
