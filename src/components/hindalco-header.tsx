@@ -62,7 +62,7 @@ export const HindalcoHeader = () => {
     },
   ];
 
-  if (!user) {
+  if (!user || user.type !== 'employee') {
     // This should ideally not happen due to the AppWrapper logic, but it's a safe fallback.
     return null;
   }
@@ -186,6 +186,12 @@ export const HindalcoHeader = () => {
               <DropdownMenuLabel className="font-normal">
                 <div className="flex flex-col space-y-1">
                   <p className="text-sm font-medium leading-none">{user.name}</p>
+                  <p className="text-xs leading-none text-muted-foreground">
+                    {user.designation}
+                  </p>
+                  <p className="text-xs leading-none text-muted-foreground">
+                    Department: {user.department}
+                  </p>
                   <p className="text-xs leading-none text-muted-foreground">
                     Emp Code: {user.id}
                   </p>
