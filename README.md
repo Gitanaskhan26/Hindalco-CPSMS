@@ -243,7 +243,7 @@ The application will then be available for you to test at **`http://localhost:90
 
 Let me know if you have any other questions
 
-##7. Mock Data For Testing.
+## 7. Mock Data For Testing.
 
 You can use these for testing the different departmental features.
 
