@@ -69,7 +69,7 @@ export default function VisitorLoginPage() {
       <div className="relative hidden bg-gray-100 lg:flex flex-col items-center justify-center p-12 text-white bg-primary">
         <div
           className="absolute inset-0 bg-cover bg-center opacity-10"
-          style={{ backgroundImage: 'url(https://placehold.co/1200x1200.png)'}}
+          style={{ backgroundImage: 'url(https://placehold.co/1200x1200/cccccc/cccccc.png)'}}
           data-ai-hint="corporate building welcome"
         />
         <div className="relative z-10 text-center">
