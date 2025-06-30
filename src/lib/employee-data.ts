@@ -8,7 +8,7 @@ export const mockEmployees: Omit<Employee, 'type'>[] = [
     name: 'Ramesh Kumar',
     avatarUrl: 'https://placehold.co/40x40.png',
     avatarHint: 'man portrait',
-    department: 'Maintenance',
+    department: 'Mechanical Maintenance',
     designation: 'Lead Engineer',
   },
   {
@@ -35,7 +35,7 @@ export const mockEmployees: Omit<Employee, 'type'>[] = [
     name: 'Pooja Desai',
     avatarUrl: 'https://placehold.co/40x40.png',
     avatarHint: 'woman portrait professional',
-    department: 'Production',
+    department: 'Cast House',
     designation: 'Shift Supervisor',
   },
   {
@@ -44,7 +44,7 @@ export const mockEmployees: Omit<Employee, 'type'>[] = [
     name: 'Rajesh Singh',
     avatarUrl: 'https://placehold.co/40x40.png',
     avatarHint: 'man portrait',
-    department: 'Smelter',
+    department: 'Electrical Maintenance',
     designation: 'Senior Technician',
   },
   {
@@ -98,7 +98,7 @@ export const mockEmployees: Omit<Employee, 'type'>[] = [
     name: 'Deepak Chopra',
     avatarUrl: 'https://placehold.co/40x40.png',
     avatarHint: 'man portrait bearded',
-    department: 'Fire and Safety',
+    department: 'Environment',
     designation: 'EHS Coordinator',
   },
   {
@@ -116,7 +116,7 @@ export const mockEmployees: Omit<Employee, 'type'>[] = [
     name: 'Harish Tiwari',
     avatarUrl: 'https://placehold.co/40x40.png',
     avatarHint: 'man portrait formal',
-    department: 'Production',
+    department: 'Carbon Plant',
     designation: 'Shift In-charge',
   },
   {
@@ -134,7 +134,7 @@ export const mockEmployees: Omit<Employee, 'type'>[] = [
     name: 'Manoj Verma',
     avatarUrl: 'https://placehold.co/40x40.png',
     avatarHint: 'man portrait worker',
-    department: 'Maintenance',
+    department: 'Civil Maintenance',
     designation: 'Welder',
   },
   {

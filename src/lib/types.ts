@@ -1,20 +1,31 @@
 export type RiskLevel = 'low' | 'medium' | 'high';
 export type PermitStatus = 'Approved' | 'Pending' | 'Rejected';
 export type Department =
-  | 'Safety'
-  | 'Security'
-  | 'Maintenance'
-  | 'Production'
-  | 'IT'
+  | 'Administration'
+  | 'Alumina Plant'
+  | 'Carbon Plant'
+  | 'Cast House'
+  | 'Civil Maintenance'
+  | 'Electrical Maintenance'
+  | 'Environment'
   | 'Finance'
   | 'Fire and Safety'
-  | 'Alumina Plant'
-  | 'Rectifier'
-  | 'HVAC'
-  | 'Smelter'
-  | 'Logistics'
   | 'Human Resources'
-  | 'Quality Control';
+  | 'HVAC'
+  | 'Instrumentation'
+  | 'IT'
+  | 'Laboratory'
+  | 'Logistics'
+  | 'Maintenance'
+  | 'Mechanical Maintenance'
+  | 'Power Plant'
+  | 'Procurement'
+  | 'Production'
+  | 'Quality Control'
+  | 'Rectifier'
+  | 'Safety'
+  | 'Security'
+  | 'Smelter';
 
 export type Permit = {
   id: string;
