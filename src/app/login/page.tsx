@@ -147,6 +147,9 @@ export default function LoginPage() {
                   <PopoverContent className="w-auto p-0">
                     <Calendar
                       mode="single"
+                      captionLayout="dropdown-buttons"
+                      fromYear={1930}
+                      toYear={new Date().getFullYear()}
                       selected={dob}
                       onSelect={setDob}
                       initialFocus
