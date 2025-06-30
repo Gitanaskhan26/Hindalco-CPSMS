@@ -1,5 +1,6 @@
 export type RiskLevel = 'low' | 'medium' | 'high';
 export type PermitStatus = 'Approved' | 'Pending' | 'Rejected';
+export type Department = 'Safety' | 'Security' | 'Maintenance' | 'Production';
 
 export type Permit = {
   id: string;
@@ -20,6 +21,8 @@ export interface Employee {
   avatarUrl: string;
   avatarHint: string;
   type: 'employee';
+  department: Department;
+  designation: string;
 }
 
 export interface Visitor {

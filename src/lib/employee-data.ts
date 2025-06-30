@@ -1,5 +1,6 @@
 import type { Employee } from './types';
 
+// Omit 'type' as it will be added by the fetch function
 export const mockEmployees: Omit<Employee, 'type'>[] = [
   {
     id: '12345',
@@ -7,6 +8,8 @@ export const mockEmployees: Omit<Employee, 'type'>[] = [
     name: 'Ramesh Kumar',
     avatarUrl: 'https://placehold.co/40x40.png',
     avatarHint: 'man portrait',
+    department: 'Maintenance',
+    designation: 'Lead Engineer',
   },
   {
     id: '67890',
@@ -14,6 +17,26 @@ export const mockEmployees: Omit<Employee, 'type'>[] = [
     name: 'Sunita Sharma',
     avatarUrl: 'https://placehold.co/40x40.png',
     avatarHint: 'woman portrait',
+    department: 'Safety',
+    designation: 'Safety Officer',
+  },
+  {
+    id: '11223',
+    dob: '1982-08-01',
+    name: 'Anil Mehta',
+    avatarUrl: 'https://placehold.co/40x40.png',
+    avatarHint: 'man portrait security',
+    department: 'Security',
+    designation: 'Head of Security',
+  },
+    {
+    id: '44556',
+    dob: '1992-03-30',
+    name: 'Pooja Desai',
+    avatarUrl: 'https://placehold.co/40x40.png',
+    avatarHint: 'woman portrait professional',
+    department: 'Production',
+    designation: 'Shift Supervisor',
   },
 ];
 

@@ -2,7 +2,7 @@
 
 import { z } from 'zod';
 import { assessPermitRisk } from '@/ai/flows/assess-permit-risk';
-import type { Permit } from './types';
+import type { Permit, Department } from './types';
 
 const permitSchema = z.object({
   description: z.string().min(10, 'Description must be at least 10 characters.'),
@@ -64,4 +64,45 @@ export async function createPermit(formData: FormData): Promise<FormState> {
     const errorMessage = error instanceof Error ? error.message : 'An unexpected error occurred. Please try again.';
     return { message: errorMessage };
   }
+}
+
+
+const visitorRequestSchema = z.object({
+    visitorName: z.string().min(2, 'Visitor name is required.'),
+    purpose: z.string().min(10, 'Purpose must be at least 10 characters.'),
+    visitingDepartment: z.enum(['Maintenance', 'Production', 'Safety', 'Security']),
+});
+
+type VisitorRequestFormState = {
+  message: string;
+  errors?: {
+    visitorName?: string[];
+    purpose?: string[];
+    visitingDepartment?: string[];
+  };
+};
+
+export async function requestVisitorPass(formData: FormData): Promise<VisitorRequestFormState> {
+    const validatedFields = visitorRequestSchema.safeParse({
+        visitorName: formData.get('visitorName'),
+        purpose: formData.get('purpose'),
+        visitingDepartment: formData.get('visitingDepartment'),
+    });
+
+    if (!validatedFields.success) {
+        return {
+            message: 'Please check your input. All fields are required.',
+            errors: validatedFields.error.flatten().fieldErrors,
+        };
+    }
+
+    // In a real application, this would trigger a workflow:
+    // 1. Create a pending visitor request in the database.
+    // 2. Send a notification to the head of the `visitingDepartment`.
+    // For this demo, we'll just simulate a successful request.
+    console.log('Visitor pass requested:', validatedFields.data);
+
+    await new Promise(resolve => setTimeout(resolve, 1000)); // Simulate network latency
+
+    return { message: 'Visitor pass request for ' + validatedFields.data.visitorName + ' has been sent for approval.' };
 }

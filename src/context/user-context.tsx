@@ -33,7 +33,7 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
         setUser(JSON.parse(savedUser));
       }
     } catch (error) {
-      console.error("Failed to parse user from localStorage", error);
+      console.warn("Failed to parse user from localStorage", error);
       localStorage.removeItem('user');
     }
     setIsLoading(false);

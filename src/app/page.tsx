@@ -3,17 +3,22 @@
 import * as React from 'react';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
-import { Plus, ScanLine, Map, ShieldCheck, Users } from 'lucide-react';
+import { Plus, ScanLine, Map, ShieldCheck, Users, UserPlus } from 'lucide-react';
 import { StatsCard } from '@/components/dashboard/stats-card';
-import { PermitCard } from '@/components/dashboard/permit-card';
+import { PermitCard as DashboardPermitCard } from '@/components/dashboard/permit-card';
 import { VisitorCard } from '@/components/dashboard/visitor-card';
 import { PermitForm } from '@/components/permit-form';
 import type { Permit, Visitor } from '@/lib/types';
 import { initialPermits } from '@/lib/data';
 import { fetchAllVisitors } from '@/lib/visitor-data';
+import { useUser } from '@/context/user-context';
+import { VisitorRequestForm } from '@/components/visitor-request-form';
+import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 
 export default function Home() {
-  const [isFormOpen, setIsFormOpen] = React.useState(false);
+  const { user } = useUser();
+  const [isPermitFormOpen, setIsPermitFormOpen] = React.useState(false);
+  const [isVisitorRequestFormOpen, setIsVisitorRequestFormOpen] = React.useState(false);
   const [permits, setPermits] = React.useState<Permit[]>(initialPermits);
   const [visitors, setVisitors] = React.useState<Visitor[]>([]);
 
@@ -60,20 +65,39 @@ export default function Home() {
 
   const handlePermitCreated = React.useCallback((newPermit: Permit) => {
     setPermits(prev => [newPermit, ...prev]);
-    setIsFormOpen(false);
+    setIsPermitFormOpen(false);
+  }, []);
+
+  const handleVisitorRequestSent = React.useCallback(() => {
+      // In a real app, you might refresh a list of pending requests here.
+      setIsVisitorRequestFormOpen(false);
   }, []);
 
   const recentPermits = permits.slice(0, 4);
+  const highRiskPendingPermits = permits.filter(
+    p => p.riskLevel === 'high' && p.status === 'Pending'
+  );
+
+  const isSecurity = user?.type === 'employee' && user.department === 'Security';
+  const isSafety = user?.type === 'employee' && user.department === 'Safety';
 
   return (
     <>
       <div className="container mx-auto px-4 py-6">
         <div className="flex justify-between items-center mb-6">
           <h1 className="text-2xl font-bold text-foreground">Dashboard</h1>
-          <Button onClick={() => setIsFormOpen(true)}>
-            <Plus className="mr-2" />
-            New Permit
-          </Button>
+          <div className="flex gap-2">
+            {isSecurity && (
+              <Button variant="outline" onClick={() => setIsVisitorRequestFormOpen(true)}>
+                <UserPlus className="mr-2" />
+                Request Visitor Pass
+              </Button>
+            )}
+            <Button onClick={() => setIsPermitFormOpen(true)}>
+              <Plus className="mr-2" />
+              New Permit
+            </Button>
+          </div>
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
@@ -87,11 +111,37 @@ export default function Home() {
           ))}
         </div>
 
+        {isSafety && (
+            <Card className="bg-card rounded-xl shadow-sm p-4 md:p-6 mb-8 border border-destructive/50">
+              <CardHeader className="p-0 pb-4">
+                <CardTitle className="text-xl">High-Risk Permits for Review</CardTitle>
+              </CardHeader>
+              <CardContent className="p-0">
+                <div className="space-y-4">
+                {highRiskPendingPermits.length > 0 ? (
+                  highRiskPendingPermits.map(permit => (
+                    <DashboardPermitCard
+                      key={permit.id}
+                      id={permit.id}
+                      type="Work Permit"
+                      location="Plant Area"
+                      risk="High"
+                      status={permit.status}
+                    />
+                  ))
+                ) : (
+                  <p className="text-muted-foreground text-sm">No high-risk permits are pending review.</p>
+                )}
+                </div>
+              </CardContent>
+            </Card>
+        )}
+
         <div className="bg-card rounded-xl shadow-sm p-4 md:p-6 mb-8 border">
           <h2 className="text-xl font-bold mb-4">Recent Permits</h2>
           <div className="space-y-4">
             {recentPermits.map(permit => (
-              <PermitCard
+              <DashboardPermitCard
                 key={permit.id}
                 id={permit.id}
                 type="Work Permit"
@@ -154,9 +204,14 @@ export default function Home() {
         </div>
       </div>
       <PermitForm
-        isOpen={isFormOpen}
-        onOpenChange={setIsFormOpen}
+        isOpen={isPermitFormOpen}
+        onOpenChange={setIsPermitFormOpen}
         onPermitCreated={handlePermitCreated}
+      />
+      <VisitorRequestForm
+        isOpen={isVisitorRequestFormOpen}
+        onOpenChange={setIsVisitorRequestFormOpen}
+        onVisitorRequestSent={handleVisitorRequestSent}
       />
     </>
   );
