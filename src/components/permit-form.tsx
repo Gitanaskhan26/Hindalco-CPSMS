@@ -1,3 +1,4 @@
+
 'use client';
 
 import * as React from 'react';
@@ -8,7 +9,8 @@ import { Loader2 } from 'lucide-react';
 
 import { useToast } from '@/hooks/use-toast';
 import { createPermit } from '@/lib/actions';
-import type { Permit } from '@/lib/types';
+import { useUser } from '@/context/user-context';
+import { useRefresh } from '@/context/refresh-context';
 import {
   Dialog,
   DialogContent,
@@ -32,7 +34,6 @@ import { Textarea } from '@/components/ui/textarea';
 interface PermitFormProps {
   isOpen: boolean;
   onOpenChange: (isOpen: boolean) => void;
-  onPermitCreated: (permit: Permit) => void;
 }
 
 const formSchema = z.object({
@@ -49,9 +50,10 @@ type FormValues = z.infer<typeof formSchema>;
 export function PermitForm({
   isOpen,
   onOpenChange,
-  onPermitCreated,
 }: PermitFormProps) {
   const { toast } = useToast();
+  const { user } = useUser();
+  const { triggerRefresh } = useRefresh();
   const [isSubmitting, setIsSubmitting] = React.useState(false);
 
   const form = useForm<FormValues>({
@@ -63,10 +65,21 @@ export function PermitForm({
   });
 
   const onSubmit = async (values: FormValues) => {
+    if (!user || user.type !== 'employee') {
+      toast({
+        variant: 'destructive',
+        title: 'Authentication Error',
+        description: 'You must be logged in as an employee to create a permit.',
+      });
+      return;
+    }
+
     setIsSubmitting(true);
     const formData = new FormData();
     formData.append('description', values.description);
     formData.append('ppeChecklist', values.ppeChecklist);
+    formData.append('userId', user.id);
+    formData.append('userName', user.name);
 
     try {
       const result = await createPermit(formData);
@@ -76,7 +89,7 @@ export function PermitForm({
           title: 'Success!',
           description: result.message,
         });
-        onPermitCreated(result.permit);
+        triggerRefresh();
         onOpenChange(false);
       } else if (result.errors) {
         toast({

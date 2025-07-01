@@ -12,19 +12,20 @@ import { PermitCard } from '@/components/permit-card';
 import { PermitForm } from '@/components/permit-form';
 import { QRDialog } from '@/components/qr-dialog';
 import { Skeleton } from '@/components/ui/skeleton';
+import { useRefresh } from '@/context/refresh-context';
 
 import type { Permit, Visitor } from '@/lib/types';
-import { initialPermits } from '@/lib/data';
-import { fetchAllVisitors } from '@/lib/visitor-data';
+import { getPermits, getActiveVisitors } from '@/lib/actions';
 
-// Dynamically import the MapView component as the default export.
+// Dynamically import the MapView component to prevent SSR issues with Leaflet.
 const MapView = dynamic(() => import('@/components/map-view'), {
   loading: () => <Skeleton className="h-full w-full" />,
   ssr: false,
 });
 
 export default function MapPage() {
-  const [permits, setPermits] = React.useState<Permit[]>(initialPermits);
+  const { refreshKey } = useRefresh();
+  const [permits, setPermits] = React.useState<Permit[]>([]);
   const [visitors, setVisitors] = React.useState<Visitor[]>([]);
   const [selectedPermit, setSelectedPermit] = React.useState<Permit | null>(null);
   const [selectedVisitor, setSelectedVisitor] = React.useState<Visitor | null>(null);
@@ -32,43 +33,42 @@ export default function MapPage() {
   const [qrPermit, setQrPermit] = React.useState<Permit | null>(null);
   const searchParams = useSearchParams();
 
-  // Effect to fetch visitors
+  // Data load effect
   React.useEffect(() => {
-    const loadVisitors = async () => {
-        const allVisitors = await fetchAllVisitors();
-        setVisitors(allVisitors);
+    const loadData = async () => {
+        const [fetchedPermits, fetchedVisitors] = await Promise.all([
+        getPermits(),
+        getActiveVisitors(),
+        ]);
+        setPermits(fetchedPermits);
+        setVisitors(fetchedVisitors);
     };
-    loadVisitors();
-  }, []);
+    loadData();
+  }, [refreshKey]);
+  
 
   // Effect to handle selecting a permit or visitor from the URL.
   React.useEffect(() => {
     const permitId = searchParams.get('permitId');
     const visitorId = searchParams.get('visitorId');
 
-    if (visitorId && visitors.length > 0) {
-        const visitorFromUrl = visitors.find(v => v.id === visitorId);
-        if (visitorFromUrl) {
-            setSelectedVisitor(visitorFromUrl);
-            setSelectedPermit(null);
+    // Use a timeout to ensure map and markers are likely rendered
+    setTimeout(() => {
+      if (visitorId && visitors.length > 0) {
+          const visitorFromUrl = visitors.find(v => v.id === visitorId);
+          if (visitorFromUrl) {
+              setSelectedVisitor(visitorFromUrl);
+              setSelectedPermit(null);
+          }
+      } else if (permitId && permits.length > 0) {
+        const permitFromUrl = permits.find(p => p.id === permitId);
+        if (permitFromUrl) {
+          setSelectedPermit(permitFromUrl);
+          setSelectedVisitor(null);
         }
-    } else if (permitId && permits.length > 0) {
-      const permitFromUrl = permits.find(p => p.id === permitId);
-      if (permitFromUrl) {
-        setSelectedPermit(permitFromUrl);
-        setSelectedVisitor(null);
       }
-    } else if (!selectedPermit && !selectedVisitor && permits.length > 0) {
-      // Default to selecting the first permit if nothing else is selected
-      setSelectedPermit(permits[0]);
-    }
-  }, [searchParams, permits, visitors, selectedPermit, selectedVisitor]);
-
-  const handlePermitCreated = React.useCallback((newPermit: Permit) => {
-    setPermits(prev => [newPermit, ...prev]);
-    setSelectedPermit(newPermit);
-    setIsFormOpen(false);
-  }, []);
+    }, 100);
+  }, [searchParams, permits, visitors]);
 
   const handleSelectPermit = React.useCallback((permit: Permit) => {
     setSelectedPermit(permit);
@@ -95,9 +95,21 @@ export default function MapPage() {
 
   return (
     <>
-      <div className="h-[calc(100vh-160px)] md:h-[calc(100vh-6.5rem)] grid md:grid-cols-[380px_1fr] lg:grid-cols-[420px_1fr]">
-        {/* Sidebar */}
-        <aside className="hidden md:flex flex-col border-r bg-card">
+      <div className="flex-1 w-full relative">
+        {/* Map View takes up the full space by being positioned absolutely within its relative parent */}
+        <div className="absolute inset-0">
+          <MapView
+            permits={permits}
+            selectedPermit={selectedPermit}
+            onMarkerClick={handleMarkerClick}
+            visitors={visitors}
+            selectedVisitor={selectedVisitor}
+            onVisitorMarkerClick={handleVisitorMarkerClick}
+          />
+        </div>
+        
+        {/* Sidebar floats over the map on desktop */}
+        <aside className="absolute top-0 left-0 h-full z-10 hidden md:flex flex-col bg-card/90 backdrop-blur-sm border-r w-[380px] lg:w-[420px] flex-shrink-0 shadow-lg">
           <div className="flex items-center justify-between p-4 border-b">
             <h2 className="text-xl font-bold">Active Permits</h2>
             <Button size="sm" onClick={() => setIsFormOpen(true)}>
@@ -119,23 +131,18 @@ export default function MapPage() {
           </ScrollArea>
         </aside>
 
-        {/* Map View */}
-        <main className="h-full w-full">
-          <MapView
-            permits={permits}
-            selectedPermit={selectedPermit}
-            onMarkerClick={handleMarkerClick}
-            visitors={visitors}
-            selectedVisitor={selectedVisitor}
-            onVisitorMarkerClick={handleVisitorMarkerClick}
-          />
-        </main>
+        {/* Floating Action Button for mobile */}
+        <div className="md:hidden absolute bottom-20 right-4 z-10">
+            <Button size="lg" className="rounded-full w-16 h-16 shadow-lg" onClick={() => setIsFormOpen(true)}>
+                <Plus className="h-8 w-8" />
+                <span className="sr-only">New Permit</span>
+            </Button>
+        </div>
       </div>
 
       <PermitForm
         isOpen={isFormOpen}
         onOpenChange={setIsFormOpen}
-        onPermitCreated={handlePermitCreated}
       />
       <QRDialog permit={qrPermit} onOpenChange={handleCloseQrDialog} />
     </>

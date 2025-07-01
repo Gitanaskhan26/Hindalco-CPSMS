@@ -16,54 +16,40 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from '@/components/ui/popover';
-import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from '@/components/ui/sheet';
 import {
   Bell,
   Menu,
   Map,
   FileText,
   LayoutDashboard,
-  ShieldCheck,
   LogOut,
 } from 'lucide-react';
 import { Logo } from '@/components/icons';
 import { useUser } from '@/context/user-context';
+import { useNotification } from '@/context/notification-context';
+import { NotificationItem } from './notification-item';
+import { ScrollArea } from './ui/scroll-area';
+import { Skeleton } from './ui/skeleton';
 
 export const HindalcoHeader = () => {
   const router = useRouter();
   const { user, logout } = useUser();
-
+  const { notifications, unreadCount, isLoading: isNotificationsLoading } = useNotification();
+  
   const navItems = [
     { label: 'Dashboard', href: '/', icon: LayoutDashboard },
     { label: 'Permits', href: '/permits', icon: FileText },
     { label: 'Plant Map', href: '/map', icon: Map },
   ];
 
-  const notifications = [
-    {
-      title: 'Approval Request',
-      description: 'Permit #PERMIT-004 needs your review.',
-      time: '5m ago',
-    },
-    {
-      title: 'Permit Approved',
-      description: 'Your request for #PERMIT-006 has been approved.',
-      time: '1h ago',
-    },
-    {
-      title: 'High-Risk Alert',
-      description: 'A new high-risk permit #PERMIT-001 was created.',
-      time: '3h ago',
-    },
-     {
-      title: 'Safety Inspection Due',
-      description: 'Monthly inspection for Substation B is due tomorrow.',
-      time: '1 day ago',
-    },
-  ];
-
   if (!user || user.type !== 'employee') {
-    // This should ideally not happen due to the AppWrapper logic, but it's a safe fallback.
     return null;
   }
   
@@ -81,12 +67,11 @@ export const HindalcoHeader = () => {
                   <span className="sr-only">Open menu</span>
                 </Button>
               </SheetTrigger>
-              <SheetContent side="left">
-                <div className="flex flex-col space-y-4 p-4">
-                  <Link href="/" className="flex items-center cursor-pointer mb-4 gap-3">
-                    <Logo width={40} height={40} />
-                    <span className="text-xl font-bold">C-PSMS</span>
-                  </Link>
+              <SheetContent side="left" className="p-0">
+                <SheetHeader className="p-4 border-b">
+                  <SheetTitle>Menu</SheetTitle>
+                </SheetHeader>
+                <div className="p-4">
                   <nav className="flex flex-col space-y-2">
                     {navItems.map((item) => (
                       <Button
@@ -116,7 +101,7 @@ export const HindalcoHeader = () => {
             <Button
               key={item.label}
               variant="ghost"
-              className="text-primary-foreground hover:bg-primary/80 hover:text-primary-foreground"
+              className="text-primary-foreground hover:bg-primary/90 hover:text-primary-foreground"
               onClick={() => router.push(item.href)}
             >
               {item.label}
@@ -130,40 +115,43 @@ export const HindalcoHeader = () => {
               <Button
                 variant="ghost"
                 size="icon"
-                className="hover:bg-primary/80 relative"
+                className="hover:bg-primary/90 relative"
               >
                 <Bell className="text-primary-foreground" />
-                <span className="absolute top-2 right-2 flex h-2.5 w-2.5">
-                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-accent opacity-75"></span>
-                  <span className="relative inline-flex rounded-full h-2 w-2 bg-accent"></span>
-                </span>
+                {unreadCount > 0 && (
+                  <span className="absolute top-2 right-2 flex h-2.5 w-2.5">
+                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-accent opacity-75"></span>
+                    <span className="relative inline-flex rounded-full h-2 w-2 bg-accent"></span>
+                  </span>
+                )}
                 <span className="sr-only">Notifications</span>
               </Button>
             </PopoverTrigger>
             <PopoverContent className="w-96 p-0" align="end">
                 <div className="p-4 border-b">
                     <h3 className="text-lg font-medium text-foreground">Notifications</h3>
-                    <p className="text-sm text-muted-foreground">You have {notifications.length} new messages.</p>
+                    <p className="text-sm text-muted-foreground">You have {unreadCount} new messages.</p>
                 </div>
-                <div className="flex flex-col max-h-96 overflow-y-auto">
-                    {notifications.map((notification, index) => (
-                    <div key={index} className="flex items-start gap-4 p-4 hover:bg-muted/50 cursor-pointer">
-                        <Avatar className="h-8 w-8 mt-1 border border-primary/20">
-                            <AvatarFallback className="bg-primary/10 text-primary">
-                                <ShieldCheck className="h-4 w-4" />
-                            </AvatarFallback>
-                        </Avatar>
-                        <div className="grid gap-0.5">
-                            <p className="font-semibold text-sm">{notification.title}</p>
-                            <p className="text-sm text-muted-foreground">{notification.description}</p>
-                            <p className="text-xs text-muted-foreground/80">{notification.time}</p>
-                        </div>
+                <ScrollArea className="max-h-96">
+                    <div className="flex flex-col">
+                        {isNotificationsLoading ? (
+                            <div className="p-4 space-y-4">
+                                <Skeleton className="h-16 w-full" />
+                                <Skeleton className="h-16 w-full" />
+                                <Skeleton className="h-16 w-full" />
+                            </div>
+                        ) : notifications.length > 0 ? (
+                            notifications.map((notification) => (
+                                <NotificationItem key={notification.id} notification={notification} />
+                            ))
+                        ) : (
+                            <p className="text-center text-muted-foreground p-8 text-sm">You're all caught up!</p>
+                        )}
                     </div>
-                    ))}
-                </div>
+                </ScrollArea>
                  <div className="p-2 text-center border-t">
-                    <Button variant="link" size="sm" className="text-primary font-semibold">
-                    View all notifications
+                    <Button variant="link" size="sm" className="text-primary font-semibold" asChild>
+                        <Link href="/notifications">View all notifications</Link>
                     </Button>
                 </div>
             </PopoverContent>
@@ -171,8 +159,8 @@ export const HindalcoHeader = () => {
 
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-               <Button variant="ghost" className="relative h-10 w-10 rounded-full p-0">
-                <Avatar className="h-10 w-10">
+               <Button variant="ghost" className="relative h-10 w-10 rounded-full p-0 hover:bg-primary/90">
+                <Avatar className="h-10 w-10 border-2 border-primary-foreground/20 bg-primary-foreground/10 hover:border-accent">
                   <AvatarImage
                     src={user.avatarUrl}
                     alt={user.name}

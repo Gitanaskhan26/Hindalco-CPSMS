@@ -1,13 +1,18 @@
+
 'use client';
 
 import * as React from 'react';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
-import { Loader2 } from 'lucide-react';
+import { CalendarIcon, Loader2 } from 'lucide-react';
+import { format } from 'date-fns';
 
 import { useToast } from '@/hooks/use-toast';
 import { requestVisitorPass } from '@/lib/actions';
+import { useUser } from '@/context/user-context';
+import { useRefresh } from '@/context/refresh-context';
+import { mockEmployees } from '@/lib/employee-data';
 import {
   Dialog,
   DialogContent,
@@ -34,51 +39,27 @@ import {
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
-import type { Department } from '@/lib/types';
+import { Popover, PopoverContent, PopoverTrigger } from './ui/popover';
+import { cn } from '@/lib/utils';
+import { Calendar } from './ui/calendar';
 
 interface VisitorRequestFormProps {
   isOpen: boolean;
   onOpenChange: (isOpen: boolean) => void;
-  onVisitorRequestSent: () => void;
 }
-
-const departments: Department[] = [
-  'Administration',
-  'Alumina Plant',
-  'Carbon Plant',
-  'Cast House',
-  'Civil Maintenance',
-  'Electrical Maintenance',
-  'Environment',
-  'Finance',
-  'Fire and Safety',
-  'Human Resources',
-  'HVAC',
-  'Instrumentation',
-  'IT',
-  'Laboratory',
-  'Logistics',
-  'Maintenance',
-  'Mechanical Maintenance',
-  'Power Plant',
-  'Procurement',
-  'Production',
-  'Quality Control',
-  'Rectifier',
-  'Safety',
-  'Security',
-  'Smelter',
-];
 
 const formSchema = z.object({
   visitorName: z.string().min(2, {
     message: 'Visitor name must be at least 2 characters.',
   }),
-  purpose: z.string().min(10, {
-    message: 'Purpose of visit must be at least 10 characters.',
+  visitorDob: z.date({
+    required_error: "Visitor's date of birth is required.",
   }),
-  visitingDepartment: z.enum(departments as [string, ...string[]], {
-      errorMap: () => ({ message: "Please select a department." }),
+  purpose: z.string().min(1, {
+    message: 'Purpose of visit cannot be empty.',
+  }),
+  employeeToVisitId: z.string().min(1, {
+    message: "Please select an employee.",
   }),
 });
 
@@ -87,9 +68,10 @@ type FormValues = z.infer<typeof formSchema>;
 export function VisitorRequestForm({
   isOpen,
   onOpenChange,
-  onVisitorRequestSent,
 }: VisitorRequestFormProps) {
   const { toast } = useToast();
+  const { user } = useUser();
+  const { triggerRefresh } = useRefresh();
   const [isSubmitting, setIsSubmitting] = React.useState(false);
 
   const form = useForm<FormValues>({
@@ -97,32 +79,45 @@ export function VisitorRequestForm({
     defaultValues: {
       visitorName: '',
       purpose: '',
+      employeeToVisitId: '',
     },
   });
 
   const onSubmit = async (values: FormValues) => {
+    if (!user || user.type !== 'employee') {
+        toast({ variant: 'destructive', title: 'Error', description: 'You must be logged in to make a request.' });
+        return;
+    }
+
     setIsSubmitting(true);
-    const formData = new FormData();
-    formData.append('visitorName', values.visitorName);
-    formData.append('purpose', values.purpose);
-    formData.append('visitingDepartment', values.visitingDepartment);
 
     try {
-      const result = await requestVisitorPass(formData);
+      const result = await requestVisitorPass({
+        ...values,
+        visitorDob: format(values.visitorDob, 'yyyy-MM-dd'),
+        requesterId: user.id,
+      });
 
-      if (result.errors) {
-        toast({
-          variant: 'destructive',
-          title: 'Uh oh! Something went wrong.',
-          description: result.message,
-        });
-      } else {
+      if (result.success) {
         toast({
           title: 'Success!',
           description: result.message,
         });
-        onVisitorRequestSent();
+        triggerRefresh();
         onOpenChange(false);
+      } else {
+        toast({
+          variant: 'destructive',
+          title: 'Request Failed',
+          description: result.message,
+        });
+        if (result.errors) {
+          for (const [key, value] of Object.entries(result.errors)) {
+            if (value) {
+              form.setError(key as keyof FormValues, { type: 'server', message: value[0] });
+            }
+          }
+        }
       }
     } catch (error) {
       console.error('Visitor request submission failed', error);
@@ -167,21 +162,64 @@ export function VisitorRequestForm({
                 </FormItem>
               )}
             />
+            <FormField
+              control={form.control}
+              name="visitorDob"
+              render={({ field }) => (
+                <FormItem className="flex flex-col">
+                  <FormLabel>Visitor's Date of Birth</FormLabel>
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <FormControl>
+                        <Button
+                          variant={"outline"}
+                          className={cn(
+                            "w-full pl-3 text-left font-normal",
+                            !field.value && "text-muted-foreground"
+                          )}
+                        >
+                          {field.value ? (
+                            format(field.value, "PPP")
+                          ) : (
+                            <span>Pick a date</span>
+                          )}
+                          <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                        </Button>
+                      </FormControl>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-auto p-0" align="start">
+                      <Calendar
+                        mode="single"
+                        selected={field.value}
+                        onSelect={field.onChange}
+                        disabled={(date) =>
+                          date > new Date() || date < new Date("1930-01-01")
+                        }
+                        initialFocus
+                      />
+                    </PopoverContent>
+                  </Popover>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
              <FormField
               control={form.control}
-              name="visitingDepartment"
+              name="employeeToVisitId"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Department to Visit</FormLabel>
+                  <FormLabel>Employee to Visit</FormLabel>
                    <Select onValueChange={field.onChange} defaultValue={field.value}>
                     <FormControl>
                       <SelectTrigger>
-                        <SelectValue placeholder="Select a department" />
+                        <SelectValue placeholder="Select an employee..." />
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      {departments.map(dept => (
-                        <SelectItem key={dept} value={dept}>{dept}</SelectItem>
+                      {mockEmployees.map(employee => (
+                        <SelectItem key={employee.id} value={employee.id}>
+                          {employee.name} ({employee.department})
+                        </SelectItem>
                       ))}
                     </SelectContent>
                   </Select>
@@ -196,7 +234,7 @@ export function VisitorRequestForm({
                 <FormItem>
                   <FormLabel>Purpose of Visit</FormLabel>
                   <FormControl>
-                    <Textarea placeholder="e.g., Attending a scheduled maintenance review with the engineering team." {...field} />
+                    <Textarea placeholder="e.g., Training for the new conveyor belt." {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>

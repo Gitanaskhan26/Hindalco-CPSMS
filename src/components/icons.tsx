@@ -1,5 +1,10 @@
 import * as React from 'react';
+import Image from 'next/image';
 import { cn } from '@/lib/utils';
+
+// The following import assumes you have a file at `src/components/Assets/HINDALCO-logo.ico`.
+// If this path is incorrect, please adjust it to match your file's location.
+import HindalcoLogo from './Assets/HINDALCO-logo.ico';
 
 interface LogoProps {
   width?: number | string;
@@ -9,13 +14,12 @@ interface LogoProps {
 
 export const Logo = ({ width = 64, height = 64, className }: LogoProps) => {
   return (
-    <img
-      src={`https://placehold.co/${width}x${height}`}
-      alt="Logo Placeholder"
-      width={typeof width === 'string' ? undefined : Number(width)}
-      height={typeof height === 'string' ? undefined : Number(height)}
-      className={cn('bg-muted text-muted-foreground', className)}
-      data-ai-hint="logo"
+    <Image
+      src={HindalcoLogo}
+      width={Number(width)}
+      height={Number(height)}
+      alt="Hindalco Logo"
+      className={cn(className)}
     />
   );
 };

@@ -80,7 +80,7 @@ export function AppWrapper({ children }: { children: React.ReactNode }) {
   return (
     <div className="relative flex flex-col min-h-screen bg-background">
       <HindalcoHeader />
-      <main className="flex-grow pb-20 md:pb-0">{children}</main>
+      <main className="flex flex-col flex-grow">{children}</main>
       <HindalcoFooter />
     </div>
   );

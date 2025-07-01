@@ -68,9 +68,8 @@ export default function VisitorLoginPage() {
     <div className="w-full min-h-screen lg:grid lg:grid-cols-2">
       <div className="relative hidden bg-gray-100 lg:flex flex-col items-center justify-center p-12 text-white bg-primary">
         <div
-          className="absolute inset-0 bg-cover bg-center opacity-10"
-          style={{ backgroundImage: 'url(https://placehold.co/1200x1200/cccccc/cccccc.png)'}}
-          data-ai-hint="corporate building welcome"
+          className="absolute inset-0 bg-black opacity-20"
+          data-ai-hint="modern office building"
         />
         <div className="relative z-10 text-center">
             <Logo width={64} height={64} className="mx-auto mb-6" />

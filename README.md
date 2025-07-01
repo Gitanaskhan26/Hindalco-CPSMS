@@ -86,46 +86,6 @@ It is important to note the distinction between the current prototype architectu
 
 **Note on Production Stack:** The technology choices above reflect the current prototype. As detailed in the architecture section, a production version of this application would evolve to use a dedicated **Node.js + Express.js backend** with a **PostgreSQL** database and **Prisma ORM**, separating it from the Next.js frontend.
 
----
-
-## 4. Project Structure & Component Breakdown
-
-The project follows a standard Next.js App Router structure.
-
-```
-src
-├── ai/
-│   ├── flows/assess-permit-risk.ts   # Genkit flow for AI risk assessment.
-│   └── genkit.ts                     # Genkit configuration.
-├── app/
-│   ├── (dashboard)/                  # Route group for pages with the main layout.
-│   │   ├── page.tsx                  # Main dashboard.
-│   │   ├── map/page.tsx              # Live plant map view.
-│   │   ├── permits/page.tsx          # Page to view all permits.
-│   │   └── scan/page.tsx             # QR code scanning interface.
-│   ├── login/page.tsx                # Employee login page.
-│   ├── visitor/page.tsx              # Dedicated dashboard for a logged-in visitor.
-│   └── layout.tsx                    # Root layout for the entire application.
-├── components/
-│   ├── ui/                           # ShadCN UI components.
-│   ├── app-wrapper.tsx               # Handles auth redirects and layout switching.
-│   ├── hindalco-header.tsx           # Main application header and navigation.
-│   ├── map-view.tsx                  # The interactive Leaflet map component.
-│   ├── permit-form.tsx               # Dialog for creating a new work permit.
-│   └── visitor-request-form.tsx      # Dialog for requesting a visitor pass.
-├── context/
-│   └── user-context.tsx              # React Context for managing user session.
-├── lib/
-│   ├── actions.ts                    # Server Actions (backend logic for mutations).
-│   ├── data.ts                       # Mock database for permits.
-│   ├── employee-data.ts              # Mock database for employees.
-│   ├── visitor-data.ts               # Mock database for visitors.
-│   └── types.ts                      # Central TypeScript type definitions.
-└── ...
-```
-
-### Key Component Functionality
-
 ## 4. Detailed System Workflows
 
 This section describes the end-to-end processes for different users of the C-PSMS application.
@@ -213,34 +173,57 @@ You will need a Google AI API key to run the AI risk assessment feature.
 -   **Background Location on Mobile**: For true background location tracking (even when the app isn't open), the application would need to be built as a native mobile app (e.g., using React Native), as web browsers have strict limitations on background processes to conserve battery and protect user privacy.
 -   **Testing and QA**: Add a comprehensive testing suite, including unit tests for components and server actions, and end-to-end tests to simulate user flows.
 -   **CI/CD Pipeline**: Set up a Continuous Integration/Continuous Deployment pipeline (e.g., using GitHub Actions) to automate testing and deployment processes.
--   **I want to commit this on GitHub**
-Of course! Setting up the project for local testing is a great next step. I've already ensured the `README.md` file contains all the necessary instructions. Here is a summary of the steps you'll need to follow once you download and unzip the project code:
 
-**1. Create the Environment File**
+## 7. Committing to GitHub
+To commit the whole project to GitHub, follow these steps:
+### Step 1: Download Your Project
+Download the project files from this development environment. There should be an "Export" or "Download Code" option available in the IDE's menu that will package all the files into a `.zip` archive for you.
 
-*   In the root directory of the project, create a new file named `.env`.
-*   Inside this file, add your Google AI API key like this:
-    ```
-    GOOGLE_API_KEY=your_google_ai_api_key_here
-    ```
-    This is necessary for the AI-powered risk assessment feature to work.
+### Step 2: Set Up a New Repository on GitHub
+Go to GitHub.com and log in.
+Click the + icon in the top-right corner and select New repository.
+Give your repository a name (e.g., hindalco-cpsms-app) and an optional description.
+Choose whether to make it public or private.
+Click Create repository.
+### Step 3: Upload Your Code
+After you've created the repository, GitHub will give you instructions. Since you're uploading an existing project, you'll want to follow the steps for "…or push an existing repository from the command line".
 
-**2. Install Dependencies**
+First, unzip the project you downloaded onto your local machine. Then, open a terminal or command prompt, navigate into the project's root folder, and run the following commands:
 
-*   Open your terminal, navigate to the project's root folder, and run the following command. This will download all the necessary packages for the project.
-    ```bash
-    npm install
-    ```
+```bash
+# Initialize a Git repository in your project folder
+git init -b main
 
-**3. Run the Development Server**
+# Add all the files to be tracked by Git
+git add .
 
-*   Once the installation is complete, run this command to start the application:
-    ```bash
-    npm run dev
-    ```
+# Create your first commit
+git commit -m "Initial commit of Hindalco C-PSMS MVP"
 
-The application will then be available for you to test at **`http://localhost:9003`** in your web browser.
+# Connect your local repository to the one you created on GitHub
+# (Replace with your own repository URL)
+git remote add origin https://github.com/YOUR_USERNAME/YOUR_REPOSITORY.git
 
-Let me know if you have any other questions
+# Push your code to GitHub
+git push -u origin main
 ```
+## 8. I want to download this for local testing
+I've already ensured the `README.md` file contains all the necessary instructions. Here is a summary of the steps you'll need to follow once you download and unzip the project code:
 
+### 1. Create the Environment File
+
+In the root directory of the project, create a new file named `.env`.
+Inside this file, add your Google AI API key like this:
+GOOGLE_API_KEY=your_google_ai_api_key_here
+This is necessary for the AI-powered risk assessment feature to work.
+### 2. Install Dependencies
+
+Open your terminal, navigate to the project's root folder, and run the following command. This will download all the necessary packages for the project.
+`npm install`
+### 3. Run the Development Server
+
+Once the installation is complete, run this command to start the application:
+`npm run dev`
+The application will then be available for you to test at `http://localhost:9003` in your web browser.
+
+Let me know if you have any other questions!

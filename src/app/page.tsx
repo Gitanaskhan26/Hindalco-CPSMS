@@ -1,3 +1,4 @@
+
 'use client';
 
 import * as React from 'react';
@@ -9,26 +10,36 @@ import { PermitCard as DashboardPermitCard } from '@/components/dashboard/permit
 import { VisitorCard } from '@/components/dashboard/visitor-card';
 import { PermitForm } from '@/components/permit-form';
 import type { Permit, Visitor } from '@/lib/types';
-import { initialPermits } from '@/lib/data';
-import { fetchAllVisitors } from '@/lib/visitor-data';
 import { useUser } from '@/context/user-context';
+import { useRefresh } from '@/context/refresh-context';
 import { VisitorRequestForm } from '@/components/visitor-request-form';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
+import { getPermits, getActiveVisitors } from '@/lib/actions';
 
 export default function Home() {
   const { user } = useUser();
+  const { refreshKey } = useRefresh();
   const [isPermitFormOpen, setIsPermitFormOpen] = React.useState(false);
   const [isVisitorRequestFormOpen, setIsVisitorRequestFormOpen] = React.useState(false);
-  const [permits, setPermits] = React.useState<Permit[]>(initialPermits);
+  const [permits, setPermits] = React.useState<Permit[]>([]);
   const [visitors, setVisitors] = React.useState<Visitor[]>([]);
 
   React.useEffect(() => {
-    const loadVisitors = async () => {
-        const activeVisitors = await fetchAllVisitors();
+    const loadData = async () => {
+      try {
+        const [fetchedPermits, activeVisitors] = await Promise.all([
+            getPermits(),
+            getActiveVisitors()
+        ]);
+        setPermits(fetchedPermits);
         setVisitors(activeVisitors);
+      } catch (error) {
+        console.error("Failed to fetch dashboard data:", error);
+      }
     };
-    loadVisitors();
-  }, []);
+    loadData();
+  }, [refreshKey]);
+
 
   const stats = React.useMemo(() => {
     const activePermits = permits.filter(
@@ -63,15 +74,6 @@ export default function Home() {
     ];
   }, [permits, visitors]);
 
-  const handlePermitCreated = React.useCallback((newPermit: Permit) => {
-    setPermits(prev => [newPermit, ...prev]);
-    setIsPermitFormOpen(false);
-  }, []);
-
-  const handleVisitorRequestSent = React.useCallback(() => {
-      // In a real app, you might refresh a list of pending requests here.
-      setIsVisitorRequestFormOpen(false);
-  }, []);
 
   const recentPermits = permits.slice(0, 4);
   const highRiskPendingPermits = permits.filter(
@@ -83,7 +85,7 @@ export default function Home() {
 
   return (
     <>
-      <div className="container mx-auto px-4 py-6">
+      <div className="container mx-auto px-4 py-6 pb-24 md:pb-6">
         <div className="flex justify-between items-center mb-6">
           <h1 className="text-2xl font-bold text-foreground">Dashboard</h1>
           <div className="flex gap-2">
@@ -173,31 +175,31 @@ export default function Home() {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <Button
             variant="outline"
-            className="h-24 text-base flex-col sm:flex-row"
+            className="h-24 text-base flex flex-col items-center justify-center gap-1 sm:flex-row sm:gap-2"
             asChild
           >
             <Link href="/scan">
-              <ScanLine className="mb-2 sm:mb-0 sm:mr-2" />
+              <ScanLine />
               Scan QR Code
             </Link>
           </Button>
           <Button
             variant="outline"
-            className="h-24 text-base flex-col sm:flex-row"
+            className="h-24 text-base flex flex-col items-center justify-center gap-1 sm:flex-row sm:gap-2"
             asChild
           >
             <Link href="/map">
-              <Map className="mb-2 sm:mb-0 sm:mr-2" />
+              <Map />
               View Plant Map
             </Link>
           </Button>
           <Button
             variant="outline"
-            className="h-24 text-base flex-col sm:flex-row"
+            className="h-24 text-base flex flex-col items-center justify-center gap-1 sm:flex-row sm:gap-2"
             asChild
           >
             <Link href="/permits">
-              <ShieldCheck className="mb-2 sm:mb-0 sm:mr-2" />
+              <ShieldCheck />
               All Permits
             </Link>
           </Button>
@@ -206,12 +208,10 @@ export default function Home() {
       <PermitForm
         isOpen={isPermitFormOpen}
         onOpenChange={setIsPermitFormOpen}
-        onPermitCreated={handlePermitCreated}
       />
       <VisitorRequestForm
         isOpen={isVisitorRequestFormOpen}
         onOpenChange={setIsVisitorRequestFormOpen}
-        onVisitorRequestSent={handleVisitorRequestSent}
       />
     </>
   );

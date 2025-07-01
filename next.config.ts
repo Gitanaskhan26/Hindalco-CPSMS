@@ -21,8 +21,9 @@ const nextConfig: NextConfig = {
     }
     return config;
   },
+  serverExternalPackages: ['@genkit-ai/core', 'genkit'],
   experimental: {
-    serverComponentsExternalPackages: ['@genkit-ai/core', 'genkit'],
+    // other experimental options...
   },
   images: {
     remotePatterns: [

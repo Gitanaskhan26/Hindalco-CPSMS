@@ -34,15 +34,23 @@ export const PermitCard = ({
   location,
   risk,
   status,
+  onCardClick,
 }: {
   id: string;
   type: string;
   location: string;
   risk: Risk;
   status: Status;
+  onCardClick?: () => void;
 }) => {
   return (
-    <Card className="hover:shadow-md transition-shadow duration-200">
+    <Card
+      className={cn(
+        'hover:shadow-md transition-shadow duration-200',
+        onCardClick && 'cursor-pointer'
+      )}
+      onClick={onCardClick}
+    >
       <CardContent className="p-4">
         <div className="flex justify-between items-start">
           <div>
@@ -56,7 +64,12 @@ export const PermitCard = ({
         </div>
         
         <div className="flex justify-end items-center mt-3">
-            <Button variant="ghost" size="sm" asChild>
+            <Button
+              variant="ghost"
+              size="sm"
+              asChild
+              onClick={(e) => e.stopPropagation()} // Prevent card click from firing
+            >
                 <Link href={`/map?permitId=${id}`}>
                     <MapPin className="mr-2 h-4 w-4" />
                     View on Map

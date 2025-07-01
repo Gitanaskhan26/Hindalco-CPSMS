@@ -3,6 +3,8 @@ import './globals.css';
 import { Toaster } from "@/components/ui/toaster"
 import { AppWrapper } from '@/components/app-wrapper';
 import { UserProvider } from '@/context/user-context';
+import { NotificationProvider } from '@/context/notification-context';
+import { RefreshProvider } from '@/context/refresh-context';
 
 
 export const metadata: Metadata = {
@@ -24,8 +26,12 @@ export default function RootLayout({
       </head>
       <body className="font-body antialiased" suppressHydrationWarning>
         <UserProvider>
-          <AppWrapper>{children}</AppWrapper>
-          <Toaster />
+          <RefreshProvider>
+            <NotificationProvider>
+              <AppWrapper>{children}</AppWrapper>
+              <Toaster />
+            </NotificationProvider>
+          </RefreshProvider>
         </UserProvider>
       </body>
     </html>
