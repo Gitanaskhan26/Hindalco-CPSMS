@@ -41,7 +41,7 @@ The application is built as a modern, monolithic web application using the Next.
           | (Server-side)    | (Server-side)     | (Server-side)
           v                  v                   v
 +-----------------+  +-----------------+ +-------------------+
-| Genkit AI Flow  |  | Mock Database   | | External Services |
+| Google AI Flow  |  | Mock Database   | | External Services |
 | (assessPermit..)|  | (`/lib/*.ts`)   | |-------------------|
 +-----------------+  +-----------------+ | - Leaflet Tiles   |
           |                              | - QR Server API   |
