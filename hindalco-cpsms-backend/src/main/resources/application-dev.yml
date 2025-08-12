@@ -1,0 +1,30 @@
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:5432/hindalco_cpsms_dev
+    username: postgres
+    password: password
+  
+  jpa:
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+  
+  flyway:
+    clean-disabled: false
+
+server:
+  port: 8080
+
+jwt:
+  secret: your_jwt_secret
+  expiration: 3600 # 1 hour in seconds
+
+google:
+  api:
+    key: your_google_api_key
+
+logging:
+  level:
+    com.hindalco.cpsms: DEBUG
+    org.springframework.security: DEBUG

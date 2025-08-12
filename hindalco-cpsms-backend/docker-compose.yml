@@ -1,0 +1,31 @@
+version: '3.8'
+
+services:
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "8080:8080"
+    environment:
+      SPRING_PROFILES_ACTIVE: dev
+      DATABASE_URL: jdbc:postgresql://db:5432/hindalco_cpsms
+      DATABASE_USERNAME: your_db_username
+      DATABASE_PASSWORD: your_db_password
+      JWT_SECRET: your_jwt_secret
+    depends_on:
+      - db
+
+  db:
+    image: postgres:latest
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_DB: hindalco_cpsms
+      POSTGRES_USER: your_db_username
+      POSTGRES_PASSWORD: your_db_password
+    volumes:
+      - db_data:/var/lib/postgresql/data
+
+volumes:
+  db_data:
