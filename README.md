@@ -9,7 +9,7 @@ The C-PSMS MVP is a digital permit-to-work system designed to enhance safety and
 -   **Dual Authentication System**: Separate, secure login flows for both employees and visitors. Employees use their official code and date of birth, while visitors use a pre-issued ID, ensuring that access is segregated and appropriate for each user type.
 -   **Role-Based Access Control (RBAC)**: The user interface and available actions adapt based on the employee's department (e.g., Security, Safety), providing relevant tools and information. For instance, the Security department can request visitor passes, while the Safety department gets a prioritized view of high-risk permits needing review.
 -   **Digital Permit Creation**: A streamlined form for creating work permits. This form captures essential details like work description and required Personal Protective Equipment (PPE).
--   **AI-Powered Risk Assessment**: A Genkit-based AI flow analyzes permit descriptions to automatically assess the risk level (Low, Medium, High). This provides an instant, consistent, and unbiased initial safety assessment, flagging potentially dangerous tasks for human review.
+-   **Risk Assessment**: Automated risk analysis of permit descriptions to assess the risk level (Low, Medium, High). This provides an instant, consistent, and unbiased initial safety assessment, flagging potentially dangerous tasks for human review.
 -   **Interactive Plant Map**: A live map (using Leaflet) that visualizes the real-time locations of active work permits and visitors. Permits are displayed as color-coded pins based on risk level, and visitors are shown as glowing dots, providing immediate situational awareness for all personnel.
 -   **QR Code Generation**: Secure QR codes are generated for approved permits and visitor passes for quick validation. This eliminates paperwork and allows security personnel to instantly verify the status and details of any permit or visitor on-site.
 -   **Visitor Pass Management**: A dedicated workflow for the Security department to request and manage visitor passes. The system captures visitor details and the purpose of their visit, which can then be routed for approval.
@@ -41,20 +41,20 @@ The application is built as a modern, monolithic web application using the Next.
           | (Server-side)    | (Server-side)     | (Server-side)
           v                  v                   v
 +-----------------+  +-----------------+ +-------------------+
-| Genkit AI Flow  |  | Mock Database   | | External Services |
-| (assessPermit..)|  | (`/lib/*.ts`)   | |-------------------|
+| Backend API     |  | Mock Database   | | External Services |
+| (Risk Analysis) |  | (`/lib/*.ts`)   | |-------------------|
 +-----------------+  +-----------------+ | - Leaflet Tiles   |
           |                              | - QR Server API   |
-          v (API Call)                   +-------------------+
+          v (Processing)                 +-------------------+
 +-----------------+
-| Google AI       |
-| Platform        |
+| Risk Assessment |
+| Logic           |
 +-----------------+
 ```
 
 -   **Frontend**: Built with **React** and **Next.js**, utilizing the App Router for routing and layout management. The UI is composed of **Server Components** by default for improved performance (as they render on the server and send minimal JavaScript to the client) and **Client Components** (`'use client'`) for pages or components requiring interactivity (e.g., forms, maps).
 -   **Backend**: The backend is powered by **Node.js** and is fully integrated within Next.js. We use **Server Actions** to handle all data mutations (e.g., creating permits, requesting visitor passes) securely on the server without needing to write separate API endpoints. This code lives in files marked with `'use server';`.
--   **AI Integration**: Artificial intelligence capabilities are handled by **Genkit**. The `assessPermitRisk` flow is a server-side function that communicates with the Google AI platform to analyze permit data and return a structured risk assessment. This logic is also marked as `'use server';`, ensuring API keys and prompts are never exposed to the client.
+-   **Risk Assessment**: Risk assessment capabilities are handled by backend logic. The risk assessment function analyzes permit data and returns a structured risk assessment based on predefined rules and criteria. This logic runs server-side, ensuring security and performance.
 -   **Styling**: A combination of **Tailwind CSS** for utility-first styling and **ShadCN UI** for a pre-built, accessible, and themeable component library. The theme is customized to match Hindalco's branding guidelines.
 -   **State Management**: Global user authentication and session state are managed using **React Context API** (`UserProvider`). This context wraps the application and provides user data to all components through a React Context. For complex form state, we use **React Hook Form** with **Zod** for robust schema validation.
 -   **Database (Mocked)**: In this MVP, the database is simulated using mock data arrays stored in the `src/lib/` directory. These files export `async` functions that mimic database queries, making it easy to swap them out for a real database connection in the future.
@@ -79,7 +79,6 @@ It is important to note the distinction between the current prototype architectu
 | **UI Library**  | [React](https://react.dev/)                   | Core library for building the user interface.                                    |
 | **Styling**     | [Tailwind CSS](https://tailwindcss.com/)      | A utility-first CSS framework for rapid UI development.                            |
 | **Components**  | [ShadCN UI](https://ui.shadcn.com/)           | A collection of accessible, re-usable, and beautifully designed UI components.   |
-| **AI**          | [Genkit](https://firebase.google.com/docs/genkit) | Google's framework for building production-ready AI-powered features.        |
 | **Mapping**     | [Leaflet](https://leafletjs.com/)             | An open-source JavaScript library for interactive maps.                            |
 | **Validation**  | [Zod](https://zod.dev/)                       | TypeScript-first schema validation for forms and API responses.                  |
 | **Forms**       | [React Hook Form](https://react-hook-form.com/) | Performant and flexible library for managing form state and validation.          |
@@ -94,9 +93,6 @@ The project follows a standard Next.js App Router structure.
 
 ```
 src
-├── ai/
-│   ├── flows/assess-permit-risk.ts   # Genkit flow for AI risk assessment.
-│   └── genkit.ts                     # Genkit configuration.
 ├── app/
 │   ├── (dashboard)/                  # Route group for pages with the main layout.
 │   │   ├── page.tsx                  # Main dashboard.
@@ -170,7 +166,7 @@ You will need a Google AI API key to run the AI risk assessment feature.
 ## 6. Future Improvements
 
 -   **Production Backend & Database Integration**: Transition from the integrated Next.js backend to a dedicated **Node.js + Express.js** service. Replace the mock data files in `src/lib/` with a real database connection to **PostgreSQL**, managed by the **Prisma ORM**. This is the most critical step for moving to production.
--   **Real-time Notifications**: Implement a real-time notification system (e.g., using WebSockets or a service like Firebase Cloud Messaging) for permit approvals and visitor requests. This would provide instant feedback to users instead of them needing to refresh the page.
+-   **Real-time Notifications**: Implement a real-time notification system (e.g., using WebSockets or Server-Sent Events) for permit approvals and visitor requests. This would provide instant feedback to users instead of them needing to refresh the page.
 -   **Full Visitor Approval Workflow**: Build the UI for department heads to approve or reject visitor pass requests that are submitted by the Security department. This would involve creating a new page and updating the backend to handle the change in status.
 -   **QR Code Scanning Logic**: Implement the client-side logic in `scan/page.tsx` to use the camera feed to read QR codes. This would involve adding a QR code decoding library and then using the decoded data to fetch permit/visitor details from the backend for validation.
 -   **Background Location on Mobile**: For true background location tracking (even when the app isn't open), the application would need to be built as a native mobile app (e.g., using React Native), as web browsers have strict limitations on background processes to conserve battery and protect user privacy.
