@@ -20,8 +20,8 @@ function createPermit(
     const createdDate = new Date(issueDate);
     createdDate.setMinutes(createdDate.getMinutes() - 5);
     
-    const history = [
-        { status: 'Created' as const, timestamp: createdDate.toISOString(), updatedBy: issuedBy }
+    const history: Array<{ status: PermitStatus | 'Created'; timestamp: string; updatedBy: string }> = [
+        { status: 'Created', timestamp: createdDate.toISOString(), updatedBy: issuedBy }
     ];
 
     if (status !== 'Pending') {
