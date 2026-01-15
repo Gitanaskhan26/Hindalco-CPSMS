@@ -91,8 +91,8 @@ if (!globalForVisitors.mockVisitorRequests) {
 }
 
 // All functions will now use these global arrays, which act as our persistent mock DB.
-export let mockVisitors: Omit<Visitor, 'type'>[] = globalForVisitors.mockVisitors;
-export let mockVisitorRequests: VisitorRequest[] = globalForVisitors.mockVisitorRequests;
+export let mockVisitors: Omit<Visitor, 'type'>[] = globalForVisitors.mockVisitors!;
+export let mockVisitorRequests: VisitorRequest[] = globalForVisitors.mockVisitorRequests!;
 
 
 // --- Data Mutation Functions for Requests ---
