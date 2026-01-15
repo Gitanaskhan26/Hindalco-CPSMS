@@ -2,13 +2,57 @@
 'use server';
 
 import { z } from 'zod';
-import { assessPermitRisk } from '@/ai/flows/assess-permit-risk';
-import type { Permit, Visitor, VisitorRequest } from './types';
+import type { Permit, Visitor, VisitorRequest, RiskLevel } from './types';
 import { addNotification, fetchNotificationsForUser, removeNotification } from './notification-data';
 import { mockEmployees } from './employee-data';
 import { initialPermits, findPermitById as findPermitByIdFromData, updatePermitStatus as updatePermitStatusInData } from './data';
 import { addVisitor, addVisitorRequest, findVisitorRequestById, updateVisitorRequestStatus, fetchAllVisitors, updateVisitorRequestWithVisitorId, findVisitorById } from './visitor-data';
 import { unstable_noStore as noStore, revalidatePath } from 'next/cache';
+
+// Risk assessment algorithm based on keywords and PPE requirements
+function assessPermitRisk(input: { description: string; ppeChecklist: string }): {
+  riskLevel: RiskLevel;
+  justification: string;
+} {
+  const { description, ppeChecklist } = input;
+  const descLower = description.toLowerCase();
+  const ppeLower = ppeChecklist.toLowerCase();
+
+  // High-risk keywords
+  const highRiskKeywords = [
+    'hot work', 'welding', 'cutting', 'grinding', 'height', 'confined space',
+    'electrical', 'chemical', 'radiation', 'explosive', 'toxic', 'pressure',
+    'crane', 'excavation', 'demolition'
+  ];
+
+  // Medium-risk keywords
+  const mediumRiskKeywords = [
+    'maintenance', 'repair', 'installation', 'scaffolding', 'ladder',
+    'machinery', 'vehicle', 'lifting', 'heavy', 'power tools'
+  ];
+
+  // Check for high-risk indicators
+  const hasHighRisk = highRiskKeywords.some(keyword => descLower.includes(keyword));
+  const hasMediumRisk = mediumRiskKeywords.some(keyword => descLower.includes(keyword));
+  const requiresExtensivePPE = ppeLower.split(',').length >= 4;
+
+  if (hasHighRisk || requiresExtensivePPE) {
+    return {
+      riskLevel: 'high',
+      justification: 'High-risk work activity identified. Requires enhanced safety protocols and supervision.'
+    };
+  } else if (hasMediumRisk) {
+    return {
+      riskLevel: 'medium',
+      justification: 'Moderate risk work requiring standard safety precautions and PPE compliance.'
+    };
+  } else {
+    return {
+      riskLevel: 'low',
+      justification: 'Routine work activity with standard safety requirements.'
+    };
+  }
+}
 
 const permitSchema = z.object({
   description: z.string().min(10, 'Description must be at least 10 characters.'),
@@ -66,7 +110,7 @@ export async function createPermit(formData: FormData): Promise<FormState> {
 
   try {
     const { description, ppeChecklist } = validatedFields.data;
-    const assessment = await assessPermitRisk({ description, ppeChecklist });
+    const assessment = assessPermitRisk({ description, ppeChecklist });
 
     const id = `PERMIT-${Math.floor(Math.random() * 900) + 100}`;
     const riskLevel = assessment.riskLevel;
