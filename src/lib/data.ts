@@ -77,7 +77,7 @@ if (!globalForPermits.permits) {
 }
 
 // All functions will now use this global array, which acts as our persistent mock DB.
-export let initialPermits: Permit[] = globalForPermits.permits;
+export let initialPermits: Permit[] = globalForPermits.permits!;
 
 
 // --- Data Mutation Functions ---
